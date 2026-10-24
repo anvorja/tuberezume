@@ -3,6 +3,7 @@ import { Check, ExternalLink, Copy, Trash2 } from "lucide-react"
 import { Link, useNavigate, useParams } from "react-router"
 import { toast } from "sonner"
 
+import { ConfirmDelete } from "@/components/confirm-delete"
 import { Processing } from "@/components/processing"
 import { SummaryBody } from "@/components/summary-body"
 import { Thumb } from "@/components/video-card"
@@ -15,10 +16,24 @@ export default function SummaryPage() {
   const { id } = useParams()
   const { items, state, remove, submit } = useLibrary()
   const navigate = useNavigate()
-  const [confirm, setConfirm] = React.useState(false)
+  const [askDelete, setAskDelete] = React.useState(false)
+  const [deleting, setDeleting] = React.useState(false)
   const [copied, setCopied] = React.useState(false)
   const [tab, setTab] = React.useState<SummaryTab>("resumen")
   const item = items.find((s) => s.id === id)
+
+  const doDelete = async () => {
+    if (!item) return
+    setDeleting(true)
+    try {
+      await remove(item.id)
+    } catch (e) {
+      setDeleting(false)
+      throw e
+    }
+    toast.success("Resumen eliminado")
+    navigate("/app/biblioteca")
+  }
 
   if (state === "loading" && !item) {
     return (
@@ -31,6 +46,8 @@ export default function SummaryPage() {
   }
 
   if (!item) {
+    // Tras borrar, la biblioteca ya no tiene el resumen: no mostrar "no encontrado" mientras se navega.
+    if (deleting) return null
     return (
       <div className="flex max-w-md flex-col items-start gap-4 px-4 py-16 md:px-12">
         <h1 className="text-3xl font-semibold">No encontramos este resumen</h1>
@@ -57,8 +74,9 @@ export default function SummaryPage() {
         </p>
         <div className="flex gap-2">
           <Button onClick={async () => navigate(`/app/resumen/${await submit(item.url)}`)}>Reintentar</Button>
-          <Button variant="outline" onClick={async () => { await remove(item.id); navigate("/app/biblioteca") }}>Eliminar</Button>
+          <Button variant="outline" onClick={() => setAskDelete(true)}>Eliminar</Button>
         </div>
+        <ConfirmDelete open={askDelete} onOpenChange={setAskDelete} title={item.title || item.url} onConfirm={doDelete} />
       </div>
     )
   }
@@ -71,17 +89,6 @@ export default function SummaryPage() {
     } catch {
       toast.error("No pudimos copiar. Selecciona el texto a mano.")
     }
-  }
-
-  const del = async () => {
-    if (!confirm) {
-      setConfirm(true)
-      setTimeout(() => setConfirm(false), 3500)
-      return
-    }
-    await remove(item.id)
-    toast.success("Resumen eliminado")
-    navigate("/app/biblioteca")
   }
 
   return (
@@ -111,12 +118,13 @@ export default function SummaryPage() {
               <ExternalLink /> Ver en YouTube
             </a>
           </Button>
-          <Button onClick={del} variant={confirm ? "destructive" : "ghost"} size="sm">
-            <Trash2 /> {confirm ? "Confirmar" : "Eliminar"}
+          <Button onClick={() => setAskDelete(true)} variant="ghost" size="sm">
+            <Trash2 /> Eliminar
           </Button>
         </div>
       </header>
       <SummaryBody item={item} tab={tab} onTabChange={setTab} />
+      <ConfirmDelete open={askDelete} onOpenChange={setAskDelete} title={item.title || item.url} onConfirm={doDelete} />
     </article>
   )
 }
