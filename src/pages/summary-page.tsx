@@ -7,6 +7,7 @@ import { Processing } from "@/components/processing"
 import { SummaryBody } from "@/components/summary-body"
 import { Thumb } from "@/components/video-card"
 import { Button } from "@/components/ui/button"
+import { COPY_LABEL, summaryToText, type SummaryTab } from "@/lib/export"
 import { isActive, useLibrary } from "@/lib/library"
 import { formatDuration, timeAgo, watchUrl } from "@/lib/youtube"
 
@@ -16,6 +17,7 @@ export default function SummaryPage() {
   const navigate = useNavigate()
   const [confirm, setConfirm] = React.useState(false)
   const [copied, setCopied] = React.useState(false)
+  const [tab, setTab] = React.useState<SummaryTab>("resumen")
   const item = items.find((s) => s.id === id)
 
   if (state === "loading" && !item) {
@@ -62,9 +64,8 @@ export default function SummaryPage() {
   }
 
   const copy = async () => {
-    const text = `${item.title}\n${item.url}\n\n${item.tldr}\n\n${item.keyPoints.map((p) => `- ${p}`).join("\n")}`
     try {
-      await navigator.clipboard.writeText(text)
+      await navigator.clipboard.writeText(summaryToText(item, tab))
       setCopied(true)
       setTimeout(() => setCopied(false), 1800)
     } catch {
@@ -103,7 +104,7 @@ export default function SummaryPage() {
         <div className="flex flex-wrap gap-2">
           <Button onClick={copy} variant="outline" size="sm">
             {copied ? <Check /> : <Copy />}
-            {copied ? "Copiado" : "Copiar"}
+            {copied ? "Copiado" : `Copiar ${COPY_LABEL[tab]}`}
           </Button>
           <Button asChild variant="outline" size="sm">
             <a href={watchUrl(item.videoId)} target="_blank" rel="noreferrer">
@@ -115,7 +116,7 @@ export default function SummaryPage() {
           </Button>
         </div>
       </header>
-      <SummaryBody item={item} />
+      <SummaryBody item={item} tab={tab} onTabChange={setTab} />
     </article>
   )
 }

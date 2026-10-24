@@ -4,14 +4,15 @@ import { Search } from "lucide-react"
 
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap"
 import { cn } from "@/lib/utils"
+import type { SummaryTab } from "@/lib/export"
 import type { Summary } from "@/lib/types"
 import { formatTime, watchUrl } from "@/lib/youtube"
 
-const TABS = [
+const TABS: { id: SummaryTab; label: string }[] = [
   { id: "resumen", label: "Resumen" },
   { id: "capitulos", label: "Capítulos" },
   { id: "transcripcion", label: "Transcripción" },
-] as const
+]
 
 /** Lista con hilo vertical: cada entrada cuelga de la misma línea. */
 function Thread({ children }: { children: React.ReactNode }) {
@@ -46,8 +47,24 @@ function Highlight({ text, query }: { text: string; query: string }) {
   )
 }
 
-export function SummaryBody({ item, className }: { item: Summary; className?: string }) {
-  const [tab, setTab] = React.useState<(typeof TABS)[number]["id"]>("resumen")
+export function SummaryBody({
+  item,
+  className,
+  tab: controlledTab,
+  onTabChange,
+}: {
+  item: Summary
+  className?: string
+  /** Si se pasa, la pestaña la controla el padre (p. ej. para que "Copiar" sepa cuál está activa). */
+  tab?: SummaryTab
+  onTabChange?: (tab: SummaryTab) => void
+}) {
+  const [innerTab, setInnerTab] = React.useState<SummaryTab>("resumen")
+  const tab = controlledTab ?? innerTab
+  const setTab = (t: SummaryTab) => {
+    setInnerTab(t)
+    onTabChange?.(t)
+  }
   const [query, setQuery] = React.useState("")
   const panel = React.useRef<HTMLDivElement>(null)
 
@@ -73,7 +90,7 @@ export function SummaryBody({ item, className }: { item: Summary; className?: st
   return (
     <Tabs.Root
       value={tab}
-      onValueChange={(v) => setTab(v as typeof tab)}
+      onValueChange={(v) => setTab(v as SummaryTab)}
       className={cn("flex flex-col gap-6", className)}
     >
       <Tabs.List
