@@ -1,0 +1,270 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-display: "Bricolage Grotesque Variable", "Geist Variable", sans-serif;
+  --font-sans: "Geist Variable", system-ui, sans-serif;
+  --font-heading: var(--font-display);
+  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--surface-raised);
+  --color-popover-foreground: var(--foreground);
+  --color-primary: var(--signal);
+  --color-primary-foreground: var(--signal-foreground);
+  --color-secondary: var(--surface-raised);
+  --color-secondary-foreground: var(--foreground);
+  --color-muted: var(--surface);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--surface-raised);
+  --color-accent-foreground: var(--foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--signal);
+  --color-signal: var(--signal);
+  --color-signal-ink: var(--signal-ink);
+  --color-fiber: var(--fiber);
+
+  /* Una sola escala: superficies 20px, controles en pastilla. */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Oscuro: la escena es el celular a oscuras, de noche o en el bus. */
+:root,
+.dark {
+  --background: oklch(0.16 0.02 225);
+  --foreground: oklch(0.96 0.008 200);
+  --surface: oklch(0.2 0.022 225 / 0.72);
+  --surface-raised: oklch(0.25 0.025 225);
+  --muted-foreground: oklch(0.74 0.025 215);
+  --border: oklch(1 0 0 / 0.1);
+  --input: oklch(1 0 0 / 0.16);
+  --signal: oklch(0.9 0.2 125);
+  --signal-foreground: oklch(0.2 0.05 130);
+  --signal-ink: oklch(0.9 0.2 125);
+  --fiber: oklch(0.72 0.07 205);
+  --destructive: oklch(0.72 0.17 25);
+  --shadow-tint: 220 60% 3%;
+  color-scheme: dark;
+}
+
+.light {
+  --background: oklch(0.972 0.008 190);
+  --foreground: oklch(0.2 0.025 235);
+  --surface: oklch(1 0 0 / 0.66);
+  --surface-raised: oklch(1 0 0 / 0.9);
+  --muted-foreground: oklch(0.44 0.03 235);
+  --border: oklch(0.2 0.03 235 / 0.12);
+  --input: oklch(0.2 0.03 235 / 0.22);
+  --signal: oklch(0.88 0.2 125);
+  --signal-foreground: oklch(0.2 0.05 130);
+  --signal-ink: oklch(0.44 0.13 145);
+  --fiber: oklch(0.45 0.07 215);
+  --destructive: oklch(0.52 0.2 25);
+  --shadow-tint: 215 40% 20%;
+  color-scheme: light;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html {
+    @apply font-sans antialiased;
+    background: var(--background);
+    scroll-behavior: smooth;
+    text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground;
+    min-height: 100dvh;
+    overscroll-behavior-y: none;
+    font-feature-settings: "ss01", "cv11";
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+    letter-spacing: -0.03em;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  ::selection {
+    background: var(--signal);
+    color: var(--signal-foreground);
+  }
+  :focus-visible {
+    outline: 2px solid var(--signal-ink);
+    outline-offset: 3px;
+    border-radius: 0.5rem;
+  }
+  input,
+  textarea {
+    caret-color: var(--signal-ink);
+    font-size: 16px; /* evita el zoom de iOS al enfocar */
+  }
+  button,
+  a,
+  [role="tab"] {
+    touch-action: manipulation;
+  }
+  button {
+    cursor: pointer;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklch, var(--foreground) 22%, transparent)
+      transparent;
+  }
+}
+
+/* Grano fijo sobre todo: da materia al negro sin tocar contenedores con scroll. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hilo eléctrico: anillo cónico que recorre el borde de un control. */
+@property --thread-a {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.thread-ring {
+  position: relative;
+  border-radius: 9999px;
+}
+.thread-ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  pointer-events: none;
+  background:
+    conic-gradient(
+      from var(--thread-a),
+      transparent 0 55%,
+      color-mix(in oklch, var(--signal) 40%, transparent) 78%,
+      var(--signal) 92%,
+      transparent 100%
+    ),
+    linear-gradient(var(--input), var(--input));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  transition: opacity 0.4s var(--ease-out-expo);
+}
+.thread-ring:not(:focus-within):not([data-busy="true"])::before {
+  background: linear-gradient(var(--input), var(--input));
+}
+.thread-ring:focus-within::before,
+.thread-ring[data-busy="true"]::before {
+  animation: thread-spin 3.2s linear infinite;
+}
+.thread-ring::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: 0 0 36px -6px color-mix(in oklch, var(--signal) 55%, transparent);
+  transition: opacity 0.5s var(--ease-out-expo);
+}
+.thread-ring:focus-within::after,
+.thread-ring[data-busy="true"]::after {
+  opacity: 0.6;
+}
+@keyframes thread-spin {
+  to {
+    --thread-a: 360deg;
+  }
+}
+
+/* Pulso de línea: indicador de actividad sin círculos giratorios. */
+@keyframes filament {
+  0%,
+  100% {
+    transform: scaleX(0.2);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+      100deg,
+      transparent 30%,
+      color-mix(in oklch, var(--foreground) 9%, transparent) 50%,
+      transparent 70%
+    )
+    0 0 / 220% 100%,
+    color-mix(in oklch, var(--foreground) 6%, transparent);
+  animation: skeleton 1.6s ease-in-out infinite;
+}
+@keyframes skeleton {
+  from {
+    background-position: 120% 0, 0 0;
+  }
+  to {
+    background-position: -120% 0, 0 0;
+  }
+}
+
+.safe-b {
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .thread-ring:focus-within::before {
+    --thread-a: 200deg;
+  }
+}
