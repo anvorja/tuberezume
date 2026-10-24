@@ -2,7 +2,7 @@
 
 Pega un enlace de YouTube y quédate con lo esencial. TubeRezume muestra la transcripción del video, un resumen con puntos clave y capítulos que saltan al minuto exacto, y lo guarda en una biblioteca.
 
-Este repositorio es **solo el frontend**. El backend (transcripción, resumen y base de datos) vive aparte y se conecta por HTTP. Sin backend, la app corre con un simulador local para poder verla y desarrollar.
+Este repositorio es **solo el frontend**. El backend (transcripción, resumen y base de datos) vive aparte, en el repositorio `tuberezume-service`, y se conecta por HTTP. Sin backend, la app corre con un simulador local para poder verla y desarrollar.
 
 ## Qué incluye
 
@@ -11,8 +11,9 @@ Este repositorio es **solo el frontend**. El backend (transcripción, resumen y 
   - nuevo resumen con validación del enlace y botón de pegar desde el portapapeles;
   - pantalla de procesamiento en tres etapas (enlace, transcripción, resumen);
   - biblioteca con búsqueda y filtros;
-  - vista de resumen con pestañas Resumen, Capítulos y Transcripción buscable;
-  - ajustes.
+  - vista de resumen con pestañas Resumen, Capítulos y Transcripción buscable, y un botón **Copiar** que copia la pestaña abierta (resumen, capítulos o transcripción) como texto plano;
+  - eliminar un resumen con un diálogo de confirmación que muestra el título del video, no borra con un clic fuera, y si el servidor falla se queda abierto con el motivo y permite reintentar;
+  - ajustes (tema, búsqueda web y conexión con el backend).
 - **Móvil primero:** barra de pestañas inferior en móvil y menú lateral en escritorio.
 - **Tema oscuro (por defecto) y claro.**
 - **Accesibilidad de movimiento:** respeta `prefers-reduced-motion`.
@@ -98,6 +99,12 @@ src/
     gsap.ts     registro de plugins de GSAP
   index.css     tokens de diseño (oscuro y claro), Tailwind
 ```
+
+## Despliegue en Netlify
+
+- Build: `pnpm build`; directorio de publicación: `dist`. No hace falta ninguna variable de entorno.
+- `public/_redirects` redirige cualquier ruta a `index.html` (`/*  /index.html  200`), para que recargar `/app/ajustes` o un resumen no dé 404.
+- La dirección del backend y la clave se escriben en **Ajustes** una vez desplegado (ver «Conectar el backend»).
 
 ## Contexto de producto
 
