@@ -173,7 +173,7 @@ function advance(item: Stored): Stored {
     status: "ready",
     progress: 1,
     tldr:
-      "Respuesta simulada: el frontend no está conectado a un backend. Define VITE_API_URL para recibir aquí el resumen real de este video.",
+      "Respuesta simulada: no hay un servidor conectado. Ve a Ajustes, escribe la dirección de tu servidor y la clave de acceso para recibir aquí el resumen real de este video.",
     keyPoints: [
       "Este resumen es de demostración y no refleja el contenido del video.",
       "Con el backend conectado verás aquí los puntos clave generados.",
