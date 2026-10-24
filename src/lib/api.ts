@@ -5,12 +5,12 @@ import { parseYouTubeId } from "./youtube"
 /**
  * Capa de acceso al backend.
  *
- * Con VITE_API_URL definido se usa `httpApi` (contrato supuesto, ajustable):
+ * Con una conexión (guardada en Ajustes o VITE_API_URL) se usa el backend HTTP:
  *   POST   /summaries        { url }  -> Summary (status "queued")
  *   GET    /summaries                 -> Summary[]
  *   GET    /summaries/:id             -> Summary
  *   DELETE /summaries/:id
- * Sin VITE_API_URL se usa `mockApi`, que persiste en localStorage y simula
+ * Sin conexión se usa `mockApi`, que persiste en localStorage y simula
  * las etapas de procesamiento por tiempo transcurrido.
  */
 export interface Api {
@@ -20,26 +20,105 @@ export interface Api {
   remove(id: string): Promise<void>
 }
 
-const BASE = import.meta.env.VITE_API_URL as string | undefined
+const ENV_BASE = import.meta.env.VITE_API_URL as string | undefined
 
-async function http<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    ...init,
-  })
+/**
+ * Conexión elegida en Ajustes. Vive en localStorage (no en el bundle), así un
+ * frontend desplegado puede apuntar a un backend cuya URL cambia (p. ej. un túnel).
+ */
+export interface Connection {
+  url: string
+  token: string
+}
+
+const CONN_KEY = "tr:connection"
+const SEARCH_KEY = "tr:websearch"
+
+export function normalizeUrl(raw: string): string {
+  return raw.trim().replace(/\/+$/, "")
+}
+
+export function getConnection(): Connection | null {
+  try {
+    const raw = localStorage.getItem(CONN_KEY)
+    if (raw) {
+      const c = JSON.parse(raw) as Partial<Connection>
+      if (c.url) return { url: normalizeUrl(c.url), token: c.token ?? "" }
+    }
+  } catch {
+    /* almacenamiento bloqueado o dato corrupto */
+  }
+  return ENV_BASE ? { url: normalizeUrl(ENV_BASE), token: "" } : null
+}
+
+export function saveConnection(c: Connection | null) {
+  try {
+    if (c && c.url.trim()) {
+      localStorage.setItem(
+        CONN_KEY,
+        JSON.stringify({ url: normalizeUrl(c.url), token: c.token.trim() })
+      )
+    } else {
+      localStorage.removeItem(CONN_KEY)
+    }
+  } catch {
+    /* sin persistencia local */
+  }
+}
+
+/** Preferencia de Ajustes: pedir al backend que complete el resumen con una búsqueda web. */
+export function getWebSearch(): boolean {
+  try {
+    return localStorage.getItem(SEARCH_KEY) === "on"
+  } catch {
+    return false
+  }
+}
+
+export function setWebSearch(on: boolean) {
+  try {
+    localStorage.setItem(SEARCH_KEY, on ? "on" : "off")
+  } catch {
+    /* sin persistencia local */
+  }
+}
+
+async function http<T>(conn: Connection, path: string, init?: RequestInit): Promise<T> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    // El plan gratuito de ngrok responde con una página de aviso HTML si falta esta cabecera.
+    "ngrok-skip-browser-warning": "1",
+  }
+  if (conn.token) headers.Authorization = `Bearer ${conn.token}`
+  let res: Response
+  try {
+    res = await fetch(`${conn.url}${path}`, { ...init, headers })
+  } catch {
+    throw new Error(
+      "No pudimos conectar con el servidor. Revisa que esté encendido y que la dirección en Ajustes sea correcta."
+    )
+  }
   if (!res.ok) {
     const body = await res.json().catch(() => null)
+    if (res.status === 401) {
+      throw new Error(body?.message ?? "La clave de acceso es incorrecta. Revísala en Ajustes.")
+    }
     throw new Error(body?.message ?? `Error ${res.status}`)
   }
   return res.status === 204 ? (undefined as T) : res.json()
 }
 
-const httpApi: Api = {
-  list: () => http("/summaries"),
-  get: (id) => http(`/summaries/${id}`),
-  create: (url) =>
-    http("/summaries", { method: "POST", body: JSON.stringify({ url }) }),
-  remove: (id) => http(`/summaries/${id}`, { method: "DELETE" }),
+function makeHttpApi(conn: Connection): Api {
+  return {
+    list: () => http(conn, "/summaries"),
+    get: (id) => http(conn, `/summaries/${id}`),
+    create: (url) =>
+      http(conn, "/summaries", {
+        method: "POST",
+        body: JSON.stringify({ url, webSearch: getWebSearch() }),
+      }),
+    remove: (id) => http(conn, `/summaries/${id}`, { method: "DELETE" }),
+  }
 }
 
 /* ---------- Mock ---------- */
@@ -177,5 +256,17 @@ const mockApi: Api = {
   },
 }
 
-export const api: Api = BASE ? httpApi : mockApi
-export const isMock = !BASE
+/** Elige backend real o simulador en cada llamada, según la conexión guardada. */
+function current(): Api {
+  const conn = getConnection()
+  return conn ? makeHttpApi(conn) : mockApi
+}
+
+export const api: Api = {
+  list: () => current().list(),
+  get: (id) => current().get(id),
+  create: (url) => current().create(url),
+  remove: (id) => current().remove(id),
+}
+
+export const isMock = () => !getConnection()

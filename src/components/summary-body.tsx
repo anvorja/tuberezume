@@ -104,6 +104,25 @@ export function SummaryBody({ item, className }: { item: Summary; className?: st
               </li>
             ))}
           </Thread>
+          {item.sources && item.sources.length > 0 && (
+            <div data-in className="flex flex-col gap-2 text-sm">
+              <p className="font-medium">Contexto de la web</p>
+              <ul className="flex flex-col gap-1">
+                {item.sources.map((s) => (
+                  <li key={s.url}>
+                    <a
+                      href={s.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                    >
+                      {s.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </Tabs.Content>
 
         <Tabs.Content value="capitulos" className="outline-none">

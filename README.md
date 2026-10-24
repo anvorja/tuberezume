@@ -53,32 +53,31 @@ Abre la URL que muestra Vite. Scripts disponibles:
 
 ## Conectar el backend
 
-La app habla con el backend a través de `src/lib/api.ts`.
+La app habla con el backend a través de `src/lib/api.ts`. El backend vive en `../backend_rezume`.
 
-1. Crea un archivo `.env.local` (está ignorado por git) con la URL base:
+Hay dos formas de indicar dónde está, y la segunda es la que sirve para un frontend desplegado:
 
-   ```bash
-   VITE_API_URL=https://tu-backend.example.com
-   ```
+1. **Variable de entorno (desarrollo local):** crea `.env.local` (ignorado por git) con `VITE_API_URL=http://localhost:8000` y reinicia `pnpm dev`.
+2. **Ajustes de la app:** en **Ajustes → Conexión con el backend** escribe la dirección del servidor y la clave de acceso. Se guardan solo en el `localStorage` del navegador y tienen prioridad sobre `VITE_API_URL`. Es lo que permite que la web desplegada apunte a un backend local expuesto con un túnel (ngrok), cuya URL cambia en cada arranque.
 
-2. El contrato que espera el frontend es una **suposición de diseño**; ajusta `src/lib/api.ts` si tu backend difiere:
+El backend exige la cabecera `Authorization: Bearer <clave>` cuando tiene `API_TOKEN` definido. Cada petición también envía `ngrok-skip-browser-warning`, sin la cual el plan gratuito de ngrok devuelve una página HTML en lugar de JSON. Además, **Ajustes → Búsqueda web** hace que el backend complete el resumen con contexto de la web; las fuentes usadas se muestran al final de la pestaña Resumen.
 
-   | Método y ruta           | Cuerpo         | Respuesta                      |
-   | ----------------------- | -------------- | ------------------------------ |
-   | `POST /summaries`       | `{ "url": "…" }` | `Summary` recién creado        |
-   | `GET /summaries`        |                | `Summary[]`                    |
-   | `GET /summaries/:id`    |                | `Summary`                      |
-   | `DELETE /summaries/:id` |                | `204` sin cuerpo               |
+Contrato que usa el frontend (el backend lo implementa):
 
-   En caso de error, el frontend lee `message` del JSON de la respuesta para mostrarlo. El tipo `Summary` está en `src/lib/types.ts`; `status` va de `queued` a `transcribing`, `summarizing` y `ready` (o `failed`), con `progress` de 0 a 1. Mientras haya resúmenes en proceso, el frontend consulta `GET /summaries/:id` cada 1,2 s.
+| Método y ruta           | Cuerpo                                   | Respuesta                      |
+| ----------------------- | ---------------------------------------- | ------------------------------ |
+| `POST /summaries`       | `{ "url": "…", "webSearch": true }`      | `Summary` recién creado        |
+| `GET /summaries`        |                                          | `Summary[]`                    |
+| `GET /summaries/:id`    |                                          | `Summary`                      |
+| `DELETE /summaries/:id` |                                          | `204` sin cuerpo               |
 
-3. Reinicia `pnpm dev`: las variables `VITE_*` se leen al arrancar.
+En caso de error, el frontend lee `message` del JSON de la respuesta para mostrarlo. El tipo `Summary` está en `src/lib/types.ts`; `status` va de `queued` a `transcribing`, `summarizing` y `ready` (o `failed`), con `progress` de 0 a 1. Mientras haya resúmenes en proceso, el frontend consulta `GET /summaries/:id` cada 1,2 s.
 
-> Todo lo que lleva el prefijo `VITE_` queda dentro del bundle y es visible para cualquiera. No pongas ahí claves ni secretos; esos viven en el backend.
+> Todo lo que lleva el prefijo `VITE_` queda dentro del bundle y es visible para cualquiera. No pongas ahí claves ni secretos; la clave de acceso se escribe en Ajustes, no en el código.
 
 ### Modo simulado
 
-Sin `VITE_API_URL`, la app usa un simulador que guarda en `localStorage` y recorre las etapas por tiempo. Los resúmenes de videos nuevos son **texto de demostración**, no contenido real del video. Los tres resúmenes iniciales (`src/lib/seed.ts`) están escritos a mano, marcados como "Ejemplo" en la interfaz, y conviene quitarlos o reemplazarlos al integrar el backend.
+Sin conexión configurada, la app usa un simulador que guarda en `localStorage` y recorre las etapas por tiempo. Los resúmenes de videos nuevos son **texto de demostración**, no contenido real del video. Los tres resúmenes iniciales (`src/lib/seed.ts`) están escritos a mano, marcados como "Ejemplo" en la interfaz, y conviene quitarlos o reemplazarlos al integrar el backend.
 
 ## Estructura
 

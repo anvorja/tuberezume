@@ -32,6 +32,8 @@ export interface Summary {
   keyPoints: string[]
   chapters: Chapter[]
   transcript: TranscriptLine[]
+  /** fuentes web que el backend usó para completar el resumen */
+  sources?: { title: string; url: string }[]
   /** datos de ejemplo del frontend, no vienen del backend */
   demo?: boolean
 }
