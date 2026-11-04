@@ -111,6 +111,13 @@ async function http<T>(conn: Connection, path: string, init?: RequestInit): Prom
       clearUser()
       location.assign("/app/entrar")
     }
+    // "Not Found" / "Method Not Allowed" genéricos = la ruta no existe: el servidor es una versión anterior.
+    // (Los 404 propios del backend, como «Resumen no encontrado», traen su mensaje y se muestran tal cual.)
+    if ((res.status === 404 || res.status === 405) && /^(Not Found|Method Not Allowed)$/i.test(body?.message ?? "")) {
+      throw new Error(
+        "Este servidor aún no tiene esta función. Reinícialo (o espera a que se actualice) e inténtalo de nuevo."
+      )
+    }
     throw new Error(body?.message ?? `Error ${res.status}`)
   }
   return res.status === 204 ? (undefined as T) : res.json()
