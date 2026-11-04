@@ -15,6 +15,8 @@ interface LibraryContextValue {
   submit: (url: string) => Promise<string>
   remove: (id: string) => Promise<void>
   saveNotes: (id: string, notes: string) => Promise<void>
+  /** Cambia las etiquetas al instante y deshace el cambio si el servidor lo rechaza. */
+  setTags: (id: string, tags: string[]) => Promise<void>
 }
 
 const LibraryContext = React.createContext<LibraryContextValue | null>(null)
@@ -98,9 +100,28 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => prev.map((p) => (p.id === id ? { ...p, notes: updated.notes } : p)))
   }, [])
 
+  const setTags = React.useCallback(async (id: string, tags: string[]) => {
+    let previous: string[] | undefined
+    setItems((prev) =>
+      prev.map((p) => {
+        if (p.id !== id) return p
+        previous = p.tags
+        return { ...p, tags }
+      })
+    )
+    try {
+      const saved = await api.saveTags(id, tags)
+      // El servidor limpia las etiquetas (espacios, repetidas): se usa su versión.
+      setItems((prev) => prev.map((p) => (p.id === id ? { ...p, tags: saved.tags ?? tags } : p)))
+    } catch (e) {
+      setItems((prev) => prev.map((p) => (p.id === id ? { ...p, tags: previous } : p)))
+      throw e
+    }
+  }, [])
+
   const value = React.useMemo(
-    () => ({ items, state, error, reload, submit, remove, saveNotes }),
-    [items, state, error, reload, submit, remove, saveNotes]
+    () => ({ items, state, error, reload, submit, remove, saveNotes, setTags }),
+    [items, state, error, reload, submit, remove, saveNotes, setTags]
   )
   return <LibraryContext.Provider value={value}>{children}</LibraryContext.Provider>
 }

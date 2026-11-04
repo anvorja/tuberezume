@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router"
 
 import { Composer } from "@/components/composer"
 import { FiberField, useFiberProgress } from "@/components/fx/fiber-field"
-import { VideoCard } from "@/components/video-card"
+import { GRID_CLASS, VideoCard } from "@/components/video-card"
 import { gsap } from "@/lib/gsap"
 import { useLibrary } from "@/lib/library"
 import { useSession } from "@/lib/session"
@@ -75,7 +75,7 @@ export default function AppHome() {
           )}
         </div>
         {state === "loading" ? (
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className={GRID_CLASS}>
             {[0, 1, 2].map((i) => (
               <div key={i} className="skeleton aspect-[4/3] rounded-xl" />
             ))}
@@ -85,7 +85,7 @@ export default function AppHome() {
             Aún no has resumido nada. Pega un enlace arriba y tu primer resumen aparecerá aquí.
           </p>
         ) : (
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className={GRID_CLASS}>
             {recent.map((it) => (
               <VideoCard key={it.id} item={it} />
             ))}

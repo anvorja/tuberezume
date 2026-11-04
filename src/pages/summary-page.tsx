@@ -5,17 +5,19 @@ import { toast } from "sonner"
 
 import { ConfirmDelete } from "@/components/confirm-delete"
 import { Processing } from "@/components/processing"
+import { TagButton, TagChips, TagPicker } from "@/components/tags"
 import { SummaryBody } from "@/components/summary-body"
 import { Thumb } from "@/components/video-card"
 import { Button } from "@/components/ui/button"
 import { COPY_LABEL, summaryToText, type SummaryTab } from "@/lib/export"
 import { isActive, useLibrary } from "@/lib/library"
+import { collectTags } from "@/lib/tags"
 import { useSession } from "@/lib/session"
 import { formatDuration, timeAgo, watchUrl } from "@/lib/youtube"
 
 export default function SummaryPage() {
   const { id } = useParams()
-  const { items, state, remove, submit, saveNotes } = useLibrary()
+  const { items, state, remove, submit, saveNotes, setTags } = useLibrary()
   const { canProcess } = useSession()
   const navigate = useNavigate()
   const [askDelete, setAskDelete] = React.useState(false)
@@ -96,9 +98,9 @@ export default function SummaryPage() {
   }
 
   return (
-    <article className="grid gap-8 px-4 py-6 md:px-12 md:py-12 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:gap-14">
+    <article className="grid gap-8 px-4 py-6 md:px-12 md:py-12 lg:grid-cols-[minmax(0,19rem)_minmax(0,1fr)] lg:gap-12">
       <header className="flex flex-col gap-5 lg:sticky lg:top-8 lg:self-start">
-        <div className="aspect-video overflow-hidden rounded-xl border border-border">
+        <div className="aspect-video max-w-sm overflow-hidden rounded-xl border border-border lg:max-w-none">
           <Thumb videoId={item.videoId} />
         </div>
         <div className="flex flex-col gap-2">
@@ -108,6 +110,26 @@ export default function SummaryPage() {
             {item.durationSec > 0 && <span className="tnum"> / {formatDuration(item.durationSec)}</span>}
             <span> / {timeAgo(item.createdAt)}</span>
           </p>
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <TagChips
+              tags={item.tags ?? []}
+              onSelect={(t) => navigate(`/app/biblioteca?etiqueta=${encodeURIComponent(t)}`)}
+            />
+            <TagPicker
+              value={item.tags ?? []}
+              known={collectTags(items).map((t) => t.name)}
+              onChange={async (t) => {
+                try {
+                  await setTags(item.id, t)
+                } catch (e) {
+                  toast.error(e instanceof Error ? e.message : "No pudimos guardar las etiquetas.")
+                  throw e
+                }
+              }}
+              align="start"
+              trigger={<TagButton count={item.tags?.length ?? 0} label="Editar etiquetas" />}
+            />
+          </div>
           {item.demo && (
             <p className="text-sm text-muted-foreground">Resumen de ejemplo, escrito a mano para mostrar el formato.</p>
           )}

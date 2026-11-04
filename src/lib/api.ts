@@ -11,6 +11,7 @@ import { parseYouTubeId } from "./youtube"
  *   GET    /summaries/:id             -> Summary
  *   DELETE /summaries/:id
  *   PATCH  /summaries/:id/notes { notes }
+ *   PATCH  /summaries/:id/tags  { tags }
  * Todas exigen sesión (POST /auth/login). El administrador solo usa /admin/users.
  * Sin conexión se usa `mockApi`, que persiste en localStorage y simula
  * las etapas de procesamiento por tiempo transcurrido.
@@ -21,6 +22,7 @@ export interface Api {
   create(url: string): Promise<Summary>
   remove(id: string): Promise<void>
   saveNotes(id: string, notes: string): Promise<Summary>
+  saveTags(id: string, tags: string[]): Promise<Summary>
 }
 
 const ENV_BASE = import.meta.env.VITE_API_URL as string | undefined
@@ -126,6 +128,8 @@ function makeHttpApi(conn: Connection): Api {
     remove: (id) => http(conn, `/summaries/${id}`, { method: "DELETE" }),
     saveNotes: (id, notes) =>
       http(conn, `/summaries/${id}/notes`, { method: "PATCH", body: JSON.stringify({ notes }) }),
+    saveTags: (id, tags) =>
+      http(conn, `/summaries/${id}/tags`, { method: "PATCH", body: JSON.stringify({ tags }) }),
   }
 }
 
@@ -346,6 +350,14 @@ const mockApi: Api = {
     save(items)
     return found
   },
+  async saveTags(id, tags) {
+    const items = load()
+    const found = items.find((s) => s.id === id)
+    if (!found) throw new Error("No encontramos este resumen.")
+    found.tags = tags
+    save(items)
+    return found
+  },
 }
 
 /** Elige backend real o simulador en cada llamada, según la conexión guardada. */
@@ -360,6 +372,7 @@ export const api: Api = {
   create: (url) => current().create(url),
   remove: (id) => current().remove(id),
   saveNotes: (id, notes) => current().saveNotes(id, notes),
+  saveTags: (id, tags) => current().saveTags(id, tags),
 }
 
 /** Modo demostración: sin servidor o sin sesión iniciada. */

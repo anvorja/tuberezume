@@ -72,12 +72,19 @@ Contrato que usa el frontend (el backend lo implementa):
 | `GET /summaries/:id`    |                                          | `Summary`                      |
 | `DELETE /summaries/:id` |                                          | `204` sin cuerpo               |
 | `PATCH /summaries/:id/notes` | `{ "notes": "…" }`                  | `Summary` actualizado          |
+| `PATCH /summaries/:id/tags`  | `{ "tags": ["Java"] }`                | `Summary` con etiquetas limpias |
 | `POST /auth/login`, `GET /auth/me` | `{ "username", "password" }`  | `{ token, user, canProcess }`  |
 | `/admin/users…`         | solo administrador                       | gestión de usuarios            |
 
 En caso de error, el frontend lee `message` del JSON de la respuesta para mostrarlo. El tipo `Summary` está en `src/lib/types.ts`; `status` va de `queued` a `transcribing`, `summarizing` y `ready` (o `failed`), con `progress` de 0 a 1. Mientras haya resúmenes en proceso, el frontend consulta `GET /summaries/:id` cada 1,2 s.
 
 > Todo lo que lleva el prefijo `VITE_` queda dentro del bundle y es visible para cualquiera. No pongas ahí claves ni secretos; la contraseña se escribe en la pantalla Entrar, no en el código.
+
+### Biblioteca: etiquetas y vistas
+
+- **Etiquetas (carpetas):** cada video admite hasta 10. Se ponen con el icono de etiqueta de la tarjeta o desde la página del resumen: escribe un nombre y pulsa Enter, o marca una existente. `java` reutiliza `Java` si ya existe. Se guardan en la base de datos, así que se ven desde cualquier equipo.
+- **Filtrar:** la barra bajo el buscador muestra cada etiqueta con su contador, más «Sin etiqueta». El filtro queda en la URL (`/app/biblioteca?etiqueta=Java`), así que se puede compartir y funciona el botón Atrás. La búsqueda también mira las etiquetas.
+- **Vistas:** miniaturas compactas o lista (se recuerda la elegida en este navegador).
 
 ### Roles y notas
 

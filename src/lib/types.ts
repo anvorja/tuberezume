@@ -36,6 +36,8 @@ export interface Summary {
   sources?: { title: string; url: string }[]
   /** apuntes del usuario sobre el video */
   notes?: string
+  /** etiquetas para organizar la biblioteca (carpetas) */
+  tags?: string[]
   /** datos de ejemplo del frontend, no vienen del backend */
   demo?: boolean
 }
