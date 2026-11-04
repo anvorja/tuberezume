@@ -34,6 +34,25 @@ export interface Summary {
   transcript: TranscriptLine[]
   /** fuentes web que el backend usó para completar el resumen */
   sources?: { title: string; url: string }[]
+  /** apuntes del usuario sobre el video */
+  notes?: string
   /** datos de ejemplo del frontend, no vienen del backend */
   demo?: boolean
+}
+
+export type Role = "admin" | "user"
+
+export interface User {
+  id: string
+  username: string
+  role: Role
+  active: boolean
+  createdAt: string
+}
+
+export interface SessionInfo {
+  token: string
+  user: User
+  /** false en el servidor de consulta (nube): no procesa videos */
+  canProcess: boolean
 }

@@ -1,18 +1,26 @@
-import { Library, Plus, Settings } from "lucide-react"
+import { Library, LogIn, Plus, Settings, Users } from "lucide-react"
 import { Link, NavLink, Outlet } from "react-router"
 
 import { Wordmark } from "@/components/brand/logo"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { useSession } from "@/lib/session"
 import { cn } from "@/lib/utils"
 
-const NAV = [
+const MEMBER_NAV = [
   { to: "/app", label: "Nuevo", icon: Plus, end: true },
   { to: "/app/biblioteca", label: "Biblioteca", icon: Library, end: false },
   { to: "/app/ajustes", label: "Ajustes", icon: Settings, end: false },
 ]
+const ADMIN_NAV = [
+  { to: "/app/usuarios", label: "Usuarios", icon: Users, end: false },
+  { to: "/app/ajustes", label: "Ajustes", icon: Settings, end: false },
+]
+const ANON_NAV = [...MEMBER_NAV, { to: "/app/entrar", label: "Entrar", icon: LogIn, end: false }]
 
 /** Móvil: barra inferior. Escritorio: riel izquierdo. */
 export function AppShell() {
+  const { role } = useSession()
+  const NAV = role === "admin" ? ADMIN_NAV : role === "user" ? MEMBER_NAV : ANON_NAV
   return (
     <div className="min-h-dvh md:grid md:grid-cols-[15rem_1fr]">
       <aside className="sticky top-0 hidden h-dvh flex-col justify-between border-r border-border p-5 md:flex">
@@ -60,7 +68,7 @@ export function AppShell() {
         aria-label="Principal"
         className="safe-b fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/85 px-3 pt-2 pb-2 backdrop-blur-xl md:hidden"
       >
-        <ul className="mx-auto grid max-w-md grid-cols-3 gap-1">
+        <ul className="mx-auto grid max-w-md gap-1" style={{ gridTemplateColumns: `repeat(${NAV.length}, minmax(0, 1fr))` }}>
           {NAV.map(({ to, label, icon: Icon, end }) => (
             <li key={to}>
               <NavLink

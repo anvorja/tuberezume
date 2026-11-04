@@ -1,12 +1,13 @@
 import type { Summary } from "./types"
 import { formatTime } from "./youtube"
 
-export type SummaryTab = "resumen" | "capitulos" | "transcripcion"
+export type SummaryTab = "resumen" | "capitulos" | "transcripcion" | "notas"
 
 export const COPY_LABEL: Record<SummaryTab, string> = {
   resumen: "resumen",
   capitulos: "capítulos",
   transcripcion: "transcripción",
+  notas: "notas",
 }
 
 /** Texto plano de la pestaña indicada, listo para pegar. */
@@ -26,6 +27,8 @@ export function summaryToText(item: Summary, tab: SummaryTab): string {
           .map((c) => `[${formatTime(c.start)}] ${c.title}\n${c.summary}`)
           .join("\n\n")
       )
+    case "notas":
+      return head + (item.notes ?? "")
     case "transcripcion":
       return head + item.transcript.map((l) => `[${formatTime(l.start)}] ${l.text}`).join("\n")
   }

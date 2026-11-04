@@ -1,6 +1,7 @@
 import * as React from "react"
 
 import { api } from "./api"
+import { useSession } from "./session"
 import type { Summary } from "./types"
 
 type LoadState = "loading" | "ready" | "error"
@@ -13,6 +14,7 @@ interface LibraryContextValue {
   /** Crea el resumen y devuelve su id. Lanza con un mensaje legible. */
   submit: (url: string) => Promise<string>
   remove: (id: string) => Promise<void>
+  saveNotes: (id: string, notes: string) => Promise<void>
 }
 
 const LibraryContext = React.createContext<LibraryContextValue | null>(null)
@@ -27,7 +29,10 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = React.useState<LoadState>("loading")
   const [error, setError] = React.useState<string | null>(null)
 
+  const { status, role } = useSession()
+
   const reload = React.useCallback(async () => {
+    if (role === "admin") return
     try {
       const list = await api.list()
       setItems(list)
@@ -37,12 +42,14 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
       setError(e instanceof Error ? e.message : "No pudimos cargar tu biblioteca.")
       setState("error")
     }
-  }, [])
+  }, [role])
 
   React.useEffect(() => {
+    // Espera a validar la sesión; el administrador no tiene resúmenes.
+    if (status === "loading") return
     let alive = true
-    api
-      .list()
+    const first: Promise<Summary[]> = role === "admin" ? Promise.resolve([]) : api.list()
+    first
       .then((list) => {
         if (!alive) return
         setItems(list)
@@ -56,7 +63,7 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     return () => {
       alive = false
     }
-  }, [])
+  }, [status, role])
 
   // Mientras haya trabajos activos, se consulta su avance cada 1,2 s.
   const activeIds = items.filter(isActive).map((s) => s.id).join(",")
@@ -86,9 +93,14 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => prev.filter((p) => p.id !== id))
   }, [])
 
+  const saveNotes = React.useCallback(async (id: string, notes: string) => {
+    const updated = await api.saveNotes(id, notes)
+    setItems((prev) => prev.map((p) => (p.id === id ? { ...p, notes: updated.notes } : p)))
+  }, [])
+
   const value = React.useMemo(
-    () => ({ items, state, error, reload, submit, remove }),
-    [items, state, error, reload, submit, remove]
+    () => ({ items, state, error, reload, submit, remove, saveNotes }),
+    [items, state, error, reload, submit, remove, saveNotes]
   )
   return <LibraryContext.Provider value={value}>{children}</LibraryContext.Provider>
 }

@@ -7,8 +7,10 @@ import {
   saveConnection,
   setWebSearch,
 } from "@/lib/api"
+import { useSession } from "@/lib/session"
 import { cn } from "@/lib/utils"
 import * as React from "react"
+import { Link } from "react-router"
 import { toast } from "sonner"
 
 function Segmented<T extends string>({
@@ -61,7 +63,7 @@ export default function Settings() {
   const [length, setLength] = usePref<"short" | "medium" | "long">("tr:length", "medium")
   const saved = getConnection()
   const [url, setUrl] = React.useState(saved?.url ?? "")
-  const [token, setToken] = React.useState(saved?.token ?? "")
+  const { username, role, canProcess, status, logout } = useSession()
   const [web, setWeb] = React.useState<"on" | "off">(getWebSearch() ? "on" : "off")
 
   function onSave(e: React.FormEvent) {
@@ -79,8 +81,9 @@ export default function Settings() {
       toast.error("Esta página usa https; el servidor también debe usar https.")
       return
     }
-    saveConnection(clean ? { url: clean, token } : null)
-    toast.success("Conexión guardada. Recargando…")
+    // La sesión se conserva: sirve en cualquier servidor que comparta la base de datos.
+    saveConnection(clean ? { url: clean, token: saved?.token ?? "" } : null)
+    toast.success("Dirección guardada. Recargando…")
     // Todo el estado de la biblioteca depende de la conexión: lo más simple es recargar.
     setTimeout(() => location.reload(), 600)
   }
@@ -120,14 +123,46 @@ export default function Settings() {
           { id: "on", label: "Sí" },
         ]}
       />
+      <section className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-5">
+        <p className="font-medium">Cuenta</p>
+        {status === "anon" ? (
+          <>
+            <p className="text-sm text-muted-foreground">
+              No has iniciado sesión. Entra para guardar y consultar tu historial desde cualquier equipo.
+            </p>
+            <Link to="/app/entrar" className="w-fit text-sm font-medium text-signal-ink hover:underline">
+              Iniciar sesión
+            </Link>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-muted-foreground">
+              Sesión como <span className="font-medium text-foreground">{username}</span>
+              {role === "admin" ? " (administrador)" : ""}.{" "}
+              {role === "user" &&
+                (status === "offline"
+                  ? "El servidor no responde."
+                  : canProcess
+                    ? "Este servidor procesa videos."
+                    : "Este servidor es solo de consulta: no procesa videos.")}
+            </p>
+            <button
+              type="button"
+              onClick={logout}
+              className="h-10 w-fit rounded-full border border-border px-5 text-sm font-medium hover:bg-surface-raised"
+            >
+              Cerrar sesión
+            </button>
+          </>
+        )}
+      </section>
       <form onSubmit={onSave} className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5">
         <div className="flex flex-col gap-1">
           <p className="font-medium">Conexión con el backend</p>
           <p className="text-sm text-muted-foreground">
             {isMock()
               ? "Modo demostración: los resúmenes se simulan y se guardan en este navegador."
-              : "Conectado a tu servidor."}{" "}
-            Si lo dejas vacío se usa el modo demostración.
+              : "Conectado a tu servidor."}
           </p>
         </div>
         <label className="flex flex-col gap-1 text-sm">
@@ -142,24 +177,15 @@ export default function Settings() {
             className="h-11 rounded-lg border border-border bg-background px-3 outline-none focus-visible:ring-2 focus-visible:ring-signal"
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm">
-          Clave de acceso
-          <input
-            type="password"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            autoComplete="off"
-            className="h-11 rounded-lg border border-border bg-background px-3 outline-none focus-visible:ring-2 focus-visible:ring-signal"
-          />
-        </label>
         <p className="text-xs text-muted-foreground">
-          La dirección y la clave se guardan solo en este navegador.
+          Usa la dirección de tu equipo (ngrok) para procesar videos, o la del servidor en la nube solo para
+          consultar tu historial. La dirección se guarda solo en este navegador.
         </p>
         <button
           type="submit"
           className="h-11 w-fit rounded-full bg-signal px-6 text-sm font-medium text-primary-foreground"
         >
-          Guardar conexión
+          Guardar dirección
         </button>
       </form>
     </div>

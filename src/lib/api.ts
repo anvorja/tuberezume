@@ -1,5 +1,5 @@
 import { SEED } from "./seed"
-import type { Summary, SummaryStatus } from "./types"
+import type { Role, SessionInfo, Summary, SummaryStatus, User } from "./types"
 import { parseYouTubeId } from "./youtube"
 
 /**
@@ -10,6 +10,8 @@ import { parseYouTubeId } from "./youtube"
  *   GET    /summaries                 -> Summary[]
  *   GET    /summaries/:id             -> Summary
  *   DELETE /summaries/:id
+ *   PATCH  /summaries/:id/notes { notes }
+ * Todas exigen sesión (POST /auth/login). El administrador solo usa /admin/users.
  * Sin conexión se usa `mockApi`, que persiste en localStorage y simula
  * las etapas de procesamiento por tiempo transcurrido.
  */
@@ -18,6 +20,7 @@ export interface Api {
   get(id: string): Promise<Summary>
   create(url: string): Promise<Summary>
   remove(id: string): Promise<void>
+  saveNotes(id: string, notes: string): Promise<Summary>
 }
 
 const ENV_BASE = import.meta.env.VITE_API_URL as string | undefined
@@ -100,8 +103,11 @@ async function http<T>(conn: Connection, path: string, init?: RequestInit): Prom
   }
   if (!res.ok) {
     const body = await res.json().catch(() => null)
-    if (res.status === 401) {
-      throw new Error(body?.message ?? "La clave de acceso es incorrecta. Revísala en Ajustes.")
+    if (res.status === 401 && conn.token && path !== "/auth/login") {
+      // Sesión caducada o desactivada: se descarta y se vuelve a pedir el acceso.
+      saveConnection({ url: conn.url, token: "" })
+      clearUser()
+      location.assign("/app/entrar")
     }
     throw new Error(body?.message ?? `Error ${res.status}`)
   }
@@ -118,7 +124,85 @@ function makeHttpApi(conn: Connection): Api {
         body: JSON.stringify({ url, webSearch: getWebSearch() }),
       }),
     remove: (id) => http(conn, `/summaries/${id}`, { method: "DELETE" }),
+    saveNotes: (id, notes) =>
+      http(conn, `/summaries/${id}/notes`, { method: "PATCH", body: JSON.stringify({ notes }) }),
   }
+}
+
+/* ---------- Sesión y administración ---------- */
+
+const USER_KEY = "tr:user"
+
+export function getCachedUser(): { username: string; role: Role } | null {
+  try {
+    const raw = localStorage.getItem(USER_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+function cacheUser(u: { username: string; role: Role }) {
+  try {
+    localStorage.setItem(USER_KEY, JSON.stringify({ username: u.username, role: u.role }))
+  } catch {
+    /* sin persistencia local */
+  }
+}
+
+function clearUser() {
+  try {
+    localStorage.removeItem(USER_KEY)
+  } catch {
+    /* sin persistencia local */
+  }
+}
+
+export const hasSession = () => !!getConnection()?.token
+
+/** Inicia sesión en el servidor indicado y guarda dirección + sesión en este navegador. */
+export async function login(url: string, username: string, password: string): Promise<SessionInfo> {
+  const base = normalizeUrl(url)
+  const s = await http<SessionInfo>({ url: base, token: "" }, "/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ username, password }),
+  })
+  saveConnection({ url: base, token: s.token })
+  cacheUser(s.user)
+  return s
+}
+
+export function logout() {
+  const c = getConnection()
+  saveConnection(c ? { url: c.url, token: "" } : null)
+  clearUser()
+}
+
+/** Valida la sesión guardada y devuelve el usuario y si este servidor puede procesar videos. */
+export async function fetchMe(): Promise<SessionInfo> {
+  const conn = getConnection()
+  if (!conn?.token) throw new Error("Sin sesión")
+  const s = await http<SessionInfo>(conn, "/auth/me")
+  cacheUser(s.user)
+  return s
+}
+
+function adminConn(): Connection {
+  const c = getConnection()
+  if (!c?.token) throw new Error("Inicia sesión para continuar.")
+  return c
+}
+
+export const adminApi = {
+  list: () => http<User[]>(adminConn(), "/admin/users"),
+  create: (username: string, password: string, role: Role) =>
+    http<User>(adminConn(), "/admin/users", {
+      method: "POST",
+      body: JSON.stringify({ username, password, role }),
+    }),
+  patch: (id: string, body: { password?: string; active?: boolean }) =>
+    http<User>(adminConn(), `/admin/users/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+  remove: (id: string) => http<void>(adminConn(), `/admin/users/${id}`, { method: "DELETE" }),
 }
 
 /* ---------- Mock ---------- */
@@ -254,12 +338,20 @@ const mockApi: Api = {
     await sleep(120)
     save(load().filter((s) => s.id !== id))
   },
+  async saveNotes(id, notes) {
+    const items = load()
+    const found = items.find((s) => s.id === id)
+    if (!found) throw new Error("No encontramos este resumen.")
+    found.notes = notes
+    save(items)
+    return found
+  },
 }
 
 /** Elige backend real o simulador en cada llamada, según la conexión guardada. */
 function current(): Api {
   const conn = getConnection()
-  return conn ? makeHttpApi(conn) : mockApi
+  return conn?.token ? makeHttpApi(conn) : mockApi
 }
 
 export const api: Api = {
@@ -267,6 +359,8 @@ export const api: Api = {
   get: (id) => current().get(id),
   create: (url) => current().create(url),
   remove: (id) => current().remove(id),
+  saveNotes: (id, notes) => current().saveNotes(id, notes),
 }
 
-export const isMock = () => !getConnection()
+/** Modo demostración: sin servidor o sin sesión iniciada. */
+export const isMock = () => !hasSession()

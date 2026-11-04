@@ -10,11 +10,13 @@ import { Thumb } from "@/components/video-card"
 import { Button } from "@/components/ui/button"
 import { COPY_LABEL, summaryToText, type SummaryTab } from "@/lib/export"
 import { isActive, useLibrary } from "@/lib/library"
+import { useSession } from "@/lib/session"
 import { formatDuration, timeAgo, watchUrl } from "@/lib/youtube"
 
 export default function SummaryPage() {
   const { id } = useParams()
-  const { items, state, remove, submit } = useLibrary()
+  const { items, state, remove, submit, saveNotes } = useLibrary()
+  const { canProcess } = useSession()
   const navigate = useNavigate()
   const [askDelete, setAskDelete] = React.useState(false)
   const [deleting, setDeleting] = React.useState(false)
@@ -73,7 +75,9 @@ export default function SummaryPage() {
           {item.error ?? "Puede que no tenga subtítulos ni audio disponible."} Intenta de nuevo o prueba con otro video.
         </p>
         <div className="flex gap-2">
-          <Button onClick={async () => navigate(`/app/resumen/${await submit(item.url)}`)}>Reintentar</Button>
+          {canProcess && (
+            <Button onClick={async () => navigate(`/app/resumen/${await submit(item.url)}`)}>Reintentar</Button>
+          )}
           <Button variant="outline" onClick={() => setAskDelete(true)}>Eliminar</Button>
         </div>
         <ConfirmDelete open={askDelete} onOpenChange={setAskDelete} title={item.title || item.url} onConfirm={doDelete} />
@@ -123,7 +127,12 @@ export default function SummaryPage() {
           </Button>
         </div>
       </header>
-      <SummaryBody item={item} tab={tab} onTabChange={setTab} />
+      <SummaryBody
+        item={item}
+        tab={tab}
+        onTabChange={setTab}
+        onSaveNotes={(n) => saveNotes(item.id, n)}
+      />
       <ConfirmDelete open={askDelete} onOpenChange={setAskDelete} title={item.title || item.url} onConfirm={doDelete} />
     </article>
   )

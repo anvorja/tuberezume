@@ -6,11 +6,13 @@ import { FiberField, useFiberProgress } from "@/components/fx/fiber-field"
 import { VideoCard } from "@/components/video-card"
 import { gsap } from "@/lib/gsap"
 import { useLibrary } from "@/lib/library"
+import { useSession } from "@/lib/session"
 import { parseYouTubeId } from "@/lib/youtube"
 
 export default function AppHome() {
   const { items, submit, state } = useLibrary()
   const navigate = useNavigate()
+  const { canProcess, status } = useSession()
   const [busy, setBusy] = React.useState(false)
   const progress = useFiberProgress(0)
 
@@ -38,12 +40,28 @@ export default function AppHome() {
           <h1 className="text-[2.6rem] leading-[0.98] font-semibold md:text-7xl">
             ¿Qué video quieres entender hoy?
           </h1>
-          <Composer
-            onSubmit={onSubmit}
-            busy={busy}
-            autoFocus={false}
-            onValueChange={tension}
-          />
+          {canProcess || status === "loading" ? (
+            <Composer
+              onSubmit={onSubmit}
+              busy={busy || status === "loading"}
+              autoFocus={false}
+              onValueChange={tension}
+            />
+          ) : (
+            <div className="flex max-w-xl flex-col gap-2 rounded-xl border border-border bg-surface p-5">
+              <p className="font-medium">
+                {status === "offline" ? "No hay conexión con el servidor" : "Este servidor es solo de consulta"}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {status === "offline"
+                  ? "Revisa que esté encendido y que la dirección en Ajustes sea correcta."
+                  : "Aquí puedes leer, editar tus notas y borrar resúmenes. Para procesar un video, conéctate al servidor de tu equipo (ngrok) desde Ajustes."}
+              </p>
+              <Link to="/app/ajustes" className="w-fit text-sm text-signal-ink hover:underline">
+                Ir a Ajustes
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 

@@ -2,6 +2,7 @@ import * as React from "react"
 import { Tabs } from "radix-ui"
 import { Search } from "lucide-react"
 
+import { Notes } from "@/components/notes"
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap"
 import { cn } from "@/lib/utils"
 import type { SummaryTab } from "@/lib/export"
@@ -12,6 +13,7 @@ const TABS: { id: SummaryTab; label: string }[] = [
   { id: "resumen", label: "Resumen" },
   { id: "capitulos", label: "Capítulos" },
   { id: "transcripcion", label: "Transcripción" },
+  { id: "notas", label: "Notas" },
 ]
 
 /** Lista con hilo vertical: cada entrada cuelga de la misma línea. */
@@ -52,12 +54,15 @@ export function SummaryBody({
   className,
   tab: controlledTab,
   onTabChange,
+  onSaveNotes,
 }: {
   item: Summary
   className?: string
   /** Si se pasa, la pestaña la controla el padre (p. ej. para que "Copiar" sepa cuál está activa). */
   tab?: SummaryTab
   onTabChange?: (tab: SummaryTab) => void
+  /** Guarda las notas del usuario; si falta, la pestaña Notas no se muestra. */
+  onSaveNotes?: (notes: string) => Promise<void>
 }) {
   const [innerTab, setInnerTab] = React.useState<SummaryTab>("resumen")
   const tab = controlledTab ?? innerTab
@@ -97,7 +102,7 @@ export function SummaryBody({
         aria-label="Secciones del resumen"
         className="flex w-fit max-w-full gap-1 overflow-x-auto rounded-full border border-border bg-surface p-1"
       >
-        {TABS.map((t) => (
+        {TABS.filter((t) => t.id !== "notas" || onSaveNotes).map((t) => (
           <Tabs.Trigger
             key={t.id}
             value={t.id}
@@ -204,6 +209,12 @@ export function SummaryBody({
             </ul>
           )}
         </Tabs.Content>
+
+        {onSaveNotes && (
+          <Tabs.Content value="notas" className="outline-none">
+            <Notes key={item.id} item={item} onSave={onSaveNotes} />
+          </Tabs.Content>
+        )}
       </div>
     </Tabs.Root>
   )

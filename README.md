@@ -59,9 +59,9 @@ La app habla con el backend a través de `src/lib/api.ts`. El backend vive en `.
 Hay dos formas de indicar dónde está, y la segunda es la que sirve para un frontend desplegado:
 
 1. **Variable de entorno (desarrollo local):** crea `.env.local` (ignorado por git) con `VITE_API_URL=http://localhost:8000` y reinicia `pnpm dev`.
-2. **Ajustes de la app:** en **Ajustes → Conexión con el backend** escribe la dirección del servidor y la clave de acceso. Se guardan solo en el `localStorage` del navegador y tienen prioridad sobre `VITE_API_URL`. Es lo que permite que la web desplegada apunte a un backend local expuesto con un túnel (ngrok), cuya URL cambia en cada arranque.
+2. **Pantalla Entrar / Ajustes:** escribe la dirección del servidor, tu usuario y tu contraseña. La dirección y la sesión se guardan solo en el `localStorage` del navegador y tienen prioridad sobre `VITE_API_URL`. Cambiar de servidor (p. ej. de ngrok a la nube) se hace en **Ajustes → Conexión**; la sesión se conserva porque ambos comparten base de datos. Es lo que permite que la web desplegada apunte a un backend local expuesto con un túnel (ngrok), cuya URL cambia en cada arranque.
 
-El backend exige la cabecera `Authorization: Bearer <clave>` cuando tiene `API_TOKEN` definido. Cada petición también envía `ngrok-skip-browser-warning`, sin la cual el plan gratuito de ngrok devuelve una página HTML en lugar de JSON. Además, **Ajustes → Búsqueda web** hace que el backend complete el resumen con contexto de la web; las fuentes usadas se muestran al final de la pestaña Resumen.
+Sin sesión la app funciona en modo demostración. Con sesión, cada petición lleva `Authorization: Bearer <sesión>`; si caduca, se vuelve a pedir el acceso. Cada petición también envía `ngrok-skip-browser-warning`, sin la cual el plan gratuito de ngrok devuelve una página HTML en lugar de JSON. Además, **Ajustes → Búsqueda web** hace que el backend complete el resumen con contexto de la web; las fuentes usadas se muestran al final de la pestaña Resumen.
 
 Contrato que usa el frontend (el backend lo implementa):
 
@@ -71,10 +71,18 @@ Contrato que usa el frontend (el backend lo implementa):
 | `GET /summaries`        |                                          | `Summary[]`                    |
 | `GET /summaries/:id`    |                                          | `Summary`                      |
 | `DELETE /summaries/:id` |                                          | `204` sin cuerpo               |
+| `PATCH /summaries/:id/notes` | `{ "notes": "…" }`                  | `Summary` actualizado          |
+| `POST /auth/login`, `GET /auth/me` | `{ "username", "password" }`  | `{ token, user, canProcess }`  |
+| `/admin/users…`         | solo administrador                       | gestión de usuarios            |
 
 En caso de error, el frontend lee `message` del JSON de la respuesta para mostrarlo. El tipo `Summary` está en `src/lib/types.ts`; `status` va de `queued` a `transcribing`, `summarizing` y `ready` (o `failed`), con `progress` de 0 a 1. Mientras haya resúmenes en proceso, el frontend consulta `GET /summaries/:id` cada 1,2 s.
 
-> Todo lo que lleva el prefijo `VITE_` queda dentro del bundle y es visible para cualquiera. No pongas ahí claves ni secretos; la clave de acceso se escribe en Ajustes, no en el código.
+> Todo lo que lleva el prefijo `VITE_` queda dentro del bundle y es visible para cualquiera. No pongas ahí claves ni secretos; la contraseña se escribe en la pantalla Entrar, no en el código.
+
+### Roles y notas
+
+- **Usuario:** ve solo sus resúmenes y tiene la pestaña **Notas** en cada uno (se guardan solas). Si el servidor conectado es solo de consulta (`canProcess: false`), la web no ofrece procesar videos y avisa de que hay que conectar el servidor ngrok; leer, notas y borrar siguen funcionando.
+- **Administrador:** solo ve **Usuarios** y **Ajustes**: crea cuentas, cambia contraseñas, desactiva o elimina usuarios (esto último borra también sus resúmenes, con confirmación en dos pasos).
 
 ### Modo simulado
 
