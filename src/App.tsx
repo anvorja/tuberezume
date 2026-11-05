@@ -10,6 +10,7 @@ import AppHome from "@/pages/app-home"
 import Landing from "@/pages/landing"
 import Library from "@/pages/library"
 import Login from "@/pages/login"
+import NotFound from "@/pages/not-found"
 import Settings from "@/pages/settings"
 import SummaryPage from "@/pages/summary-page"
 import Users from "@/pages/users"
@@ -67,7 +68,7 @@ export function App() {
             <Route path="ajustes" element={<Settings />} />
           </Route>
           <Route path="app/*" element={<LegacyApp />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster position="bottom-center" theme="system" mobileOffset={{ bottom: "6.5rem" }} offset={24} />
       </LibraryProvider>
