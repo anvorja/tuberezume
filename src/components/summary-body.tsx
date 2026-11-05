@@ -115,12 +115,12 @@ export function SummaryBody({
 
       <div ref={panel} className="scroll-mt-32">
         <Tabs.Content value="resumen" className="flex flex-col gap-8 outline-none">
-          <p data-in className="max-w-[60ch] font-display text-[1.35rem] leading-snug tracking-tight md:text-[1.6rem]">
+          <p data-in className="max-w-[60ch] font-display text-[1.1rem] leading-snug tracking-tight md:text-[1.3rem]">
             {item.tldr}
           </p>
           <Thread>
             {item.keyPoints.map((p, i) => (
-              <li key={i} data-in className="relative max-w-[62ch] leading-relaxed text-foreground/90">
+              <li key={i} data-in className="relative max-w-[62ch] text-[0.95rem] leading-relaxed text-foreground/90 md:text-base">
                 <Tick />
                 {p}
               </li>
@@ -161,7 +161,7 @@ export function SummaryBody({
                   <span className="tnum font-mono text-xs text-signal-ink">
                     {formatTime(c.start)}
                   </span>
-                  <span className="font-display text-lg font-semibold tracking-tight group-hover:underline group-hover:decoration-signal-ink group-hover:underline-offset-4">
+                  <span className="font-display text-base font-semibold tracking-tight md:text-lg group-hover:underline group-hover:decoration-signal-ink group-hover:underline-offset-4">
                     {c.title}
                   </span>
                   <span className="max-w-[58ch] text-sm text-muted-foreground">{c.summary}</span>
@@ -203,7 +203,7 @@ export function SummaryBody({
                   >
                     {formatTime(l.start)}
                   </a>
-                  <span className="max-w-[64ch] leading-relaxed text-foreground/90">
+                  <span className="max-w-[64ch] text-[0.95rem] leading-relaxed text-foreground/90 md:text-base">
                     <Highlight text={l.text} query={query.trim()} />
                   </span>
                 </li>

@@ -2,6 +2,7 @@ import * as React from "react"
 import { KeyRound, Trash2, UserPlus } from "lucide-react"
 import { toast } from "sonner"
 
+import { PasswordDialog } from "@/components/password-dialog"
 import { Button } from "@/components/ui/button"
 import { adminApi } from "@/lib/api"
 import { useSession } from "@/lib/session"
@@ -18,6 +19,7 @@ export default function Users() {
   const [pw, setPw] = React.useState("")
   const [role, setRole] = React.useState<Role>("user")
   const [busy, setBusy] = React.useState(false)
+  const [pwFor, setPwFor] = React.useState<User | null>(null) // usuario cuya clave se cambia
   const [armed, setArmed] = React.useState<string | null>(null) // usuario a punto de borrarse
 
   const load = React.useCallback(async () => {
@@ -63,16 +65,6 @@ export default function Users() {
     } finally {
       setBusy(false)
     }
-  }
-
-  function changePassword(u: User) {
-    const next = window.prompt(`Nueva contraseña para «${u.username}» (mínimo 8 caracteres):`)
-    if (next == null) return
-    if (next.length < 8) {
-      toast.error("La contraseña debe tener al menos 8 caracteres.")
-      return
-    }
-    run(() => adminApi.patch(u.id, { password: next }), "Contraseña actualizada")
   }
 
   return (
@@ -145,7 +137,7 @@ export default function Users() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" onClick={() => changePassword(u)}>
+                <Button variant="outline" size="sm" onClick={() => setPwFor(u)}>
                   <KeyRound /> Cambiar clave
                 </Button>
                 {!self && (
@@ -184,6 +176,16 @@ export default function Users() {
           )
         })}
       </section>
+      <PasswordDialog
+        key={pwFor?.id ?? "none"}
+        username={pwFor?.username ?? ""}
+        open={!!pwFor}
+        onOpenChange={(o) => !o && setPwFor(null)}
+        onConfirm={async (password) => {
+          await adminApi.patch(pwFor!.id, { password })
+          toast.success("Contraseña actualizada")
+        }}
+      />
     </div>
   )
 }
