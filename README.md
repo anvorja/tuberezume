@@ -7,7 +7,7 @@ Este repositorio es **solo el frontend**. El backend (transcripción, resumen y 
 ## Qué incluye
 
 - **Landing:** hero con el campo de enlace, cómo funciona, un resumen de ejemplo, muestra de biblioteca y cierre.
-- **Aplicación (`/app`):**
+- **Aplicación (`/` con sesión, `/biblioteca`, `/resumen/:id`, `/ajustes`; administrador en `/admin/usuarios`):**
   - nuevo resumen con validación del enlace y botón de pegar desde el portapapeles;
   - pantalla de procesamiento en tres etapas (enlace, transcripción, resumen);
   - biblioteca con búsqueda y filtros;
@@ -83,7 +83,7 @@ En caso de error, el frontend lee `message` del JSON de la respuesta para mostra
 ### Biblioteca: etiquetas y vistas
 
 - **Etiquetas (carpetas):** cada video admite hasta 10. Se ponen con el icono de etiqueta de la tarjeta o desde la página del resumen: escribe un nombre y pulsa Enter, o marca una existente. `java` reutiliza `Java` si ya existe. Se guardan en la base de datos, así que se ven desde cualquier equipo.
-- **Filtrar:** la barra bajo el buscador muestra cada etiqueta con su contador, más «Sin etiqueta». El filtro queda en la URL (`/app/biblioteca?etiqueta=Java`), así que se puede compartir y funciona el botón Atrás. La búsqueda también mira las etiquetas.
+- **Filtrar:** la barra bajo el buscador muestra cada etiqueta con su contador, más «Sin etiqueta». El filtro queda en la URL (`/biblioteca?etiqueta=Java`), así que se puede compartir y funciona el botón Atrás. La búsqueda también mira las etiquetas.
 - **Vistas:** miniaturas compactas o lista (se recuerda la elegida en este navegador).
 
 ### Roles y notas
@@ -118,7 +118,7 @@ src/
 ## Despliegue en Netlify
 
 - Build: `pnpm build`; directorio de publicación: `dist`. No hace falta ninguna variable de entorno.
-- `public/_redirects` redirige cualquier ruta a `index.html` (`/*  /index.html  200`), para que recargar `/app/ajustes` o un resumen no dé 404.
+- `public/_redirects` redirige cualquier ruta a `index.html` (`/*  /index.html  200`), para que recargar `/ajustes` o un resumen no dé 404.
 - La dirección del backend y la clave se escriben en **Ajustes** una vez desplegado (ver «Conectar el backend»).
 
 ## Contexto de producto

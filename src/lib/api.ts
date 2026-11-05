@@ -109,7 +109,7 @@ async function http<T>(conn: Connection, path: string, init?: RequestInit): Prom
       // Sesión caducada o desactivada: se descarta y se vuelve a pedir el acceso.
       saveConnection({ url: conn.url, token: "" })
       clearUser()
-      location.assign("/app/entrar")
+      location.assign("/entrar")
     }
     // "Not Found" / "Method Not Allowed" genéricos = la ruta no existe: el servidor es una versión anterior.
     // (Los 404 propios del backend, como «Resumen no encontrado», traen su mensaje y se muestran tal cual.)

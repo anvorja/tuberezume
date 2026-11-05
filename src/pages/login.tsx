@@ -2,7 +2,7 @@ import * as React from "react"
 import { Navigate } from "react-router"
 
 import { Button } from "@/components/ui/button"
-import { getConnection, hasSession, login, normalizeUrl } from "@/lib/api"
+import { getCachedUser, getConnection, hasSession, login, normalizeUrl } from "@/lib/api"
 
 const input =
   "h-11 rounded-lg border border-border bg-background px-3 outline-none focus-visible:ring-2 focus-visible:ring-signal"
@@ -15,7 +15,7 @@ export default function Login() {
   const [busy, setBusy] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
-  if (hasSession()) return <Navigate to="/app" replace />
+  if (hasSession()) return <Navigate to={getCachedUser()?.role === "admin" ? "/admin/usuarios" : "/"} replace />
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -35,9 +35,9 @@ export default function Login() {
     setBusy(true)
     setError(null)
     try {
-      await login(clean, username.trim(), password)
-      // Toda la biblioteca depende de la sesión: se recarga limpio.
-      location.assign("/app")
+      const s = await login(clean, username.trim(), password)
+      // Toda la biblioteca depende de la sesión: se recarga limpio. El administrador aterriza en su panel.
+      location.assign(s.user.role === "admin" ? "/admin/usuarios" : "/")
     } catch (err) {
       setError(err instanceof Error ? err.message : "No pudimos iniciar sesión.")
       setBusy(false)

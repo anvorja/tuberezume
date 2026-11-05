@@ -7,15 +7,15 @@ import { useSession } from "@/lib/session"
 import { cn } from "@/lib/utils"
 
 const MEMBER_NAV = [
-  { to: "/app", label: "Nuevo", icon: Plus, end: true },
-  { to: "/app/biblioteca", label: "Biblioteca", icon: Library, end: false },
-  { to: "/app/ajustes", label: "Ajustes", icon: Settings, end: false },
+  { to: "/", label: "Nuevo", icon: Plus, end: true },
+  { to: "/biblioteca", label: "Biblioteca", icon: Library, end: false },
+  { to: "/ajustes", label: "Ajustes", icon: Settings, end: false },
 ]
 const ADMIN_NAV = [
-  { to: "/app/usuarios", label: "Usuarios", icon: Users, end: false },
-  { to: "/app/ajustes", label: "Ajustes", icon: Settings, end: false },
+  { to: "/admin/usuarios", label: "Usuarios", icon: Users, end: false },
+  { to: "/ajustes", label: "Ajustes", icon: Settings, end: false },
 ]
-const ANON_NAV = [...MEMBER_NAV, { to: "/app/entrar", label: "Entrar", icon: LogIn, end: false }]
+const ANON_NAV = [...MEMBER_NAV, { to: "/entrar", label: "Entrar", icon: LogIn, end: false }]
 
 /** Móvil: barra inferior. Escritorio: riel izquierdo. */
 export function AppShell() {

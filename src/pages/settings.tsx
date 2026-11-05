@@ -130,7 +130,7 @@ export default function Settings() {
             <p className="text-sm text-muted-foreground">
               No has iniciado sesión. Entra para guardar y consultar tu historial desde cualquier equipo.
             </p>
-            <Link to="/app/entrar" className="w-fit text-sm font-medium text-signal-ink hover:underline">
+            <Link to="/entrar" className="w-fit text-sm font-medium text-signal-ink hover:underline">
               Iniciar sesión
             </Link>
           </>

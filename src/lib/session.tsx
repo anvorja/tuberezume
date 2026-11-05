@@ -47,7 +47,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
   const logout = React.useCallback(() => {
     doLogout()
-    location.assign("/app")
+    location.assign("/")
   }, [])
 
   const value = React.useMemo<SessionValue>(

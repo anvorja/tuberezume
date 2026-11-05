@@ -25,7 +25,7 @@ function useSubmitFlow(progress: FiberProgress) {
     try {
       const id = await submit(url)
       await gsap.to(progress, { current: 1, duration: 0.8, ease: "power3.inOut" })
-      navigate(`/app/resumen/${id}`)
+      navigate(`/resumen/${id}`)
     } finally {
       setBusy(false)
     }
@@ -44,7 +44,7 @@ function Header() {
       <div className="flex items-center gap-1">
         <ThemeToggle />
         <Button asChild variant="outline" size="sm">
-          <Link to="/app/biblioteca">
+          <Link to="/biblioteca">
             <span className="max-[360px]:hidden">Mi </span>
             <span className="max-[360px]:first-letter:uppercase">biblioteca</span>
           </Link>

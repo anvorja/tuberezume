@@ -95,7 +95,7 @@ export function VideoCard({ item, className, knownTags, onTagsChange, onSelectTa
       <div className="flex flex-1 flex-col gap-1 p-3">
         <h3 className="line-clamp-2 font-display text-[0.95rem] leading-snug font-semibold tracking-tight">
           {/* Enlace estirado: toda la tarjeta abre el resumen sin anidar botones dentro de un enlace. */}
-          <Link to={`/app/resumen/${item.id}`} className="outline-none after:absolute after:inset-0 after:z-0">
+          <Link to={`/resumen/${item.id}`} className="outline-none after:absolute after:inset-0 after:z-0">
             {item.title || "Video de YouTube"}
           </Link>
         </h3>
@@ -141,7 +141,7 @@ export function VideoRow({ item, className, knownTags, onTagsChange, onSelectTag
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <h3 className="line-clamp-2 font-display text-[0.95rem] leading-snug font-semibold tracking-tight sm:line-clamp-1">
-          <Link to={`/app/resumen/${item.id}`} className="outline-none after:absolute after:inset-0 after:z-0">
+          <Link to={`/resumen/${item.id}`} className="outline-none after:absolute after:inset-0 after:z-0">
             {item.title || "Video de YouTube"}
           </Link>
         </h3>

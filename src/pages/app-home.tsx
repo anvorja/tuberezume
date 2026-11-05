@@ -24,7 +24,7 @@ export default function AppHome() {
     try {
       const id = await submit(url)
       await gsap.to(progress, { current: 1, duration: 0.8, ease: "power3.inOut" })
-      navigate(`/app/resumen/${id}`)
+      navigate(`/resumen/${id}`)
     } finally {
       setBusy(false)
     }
@@ -57,7 +57,7 @@ export default function AppHome() {
                   ? "Revisa que esté encendido y que la dirección en Ajustes sea correcta."
                   : "Aquí puedes leer, editar tus notas y borrar resúmenes. Para procesar un video, conéctate al servidor de tu equipo (ngrok) desde Ajustes."}
               </p>
-              <Link to="/app/ajustes" className="w-fit text-sm text-signal-ink hover:underline">
+              <Link to="/ajustes" className="w-fit text-sm text-signal-ink hover:underline">
                 Ir a Ajustes
               </Link>
             </div>
@@ -69,7 +69,7 @@ export default function AppHome() {
         <div className="flex items-baseline justify-between">
           <h2 className="text-2xl font-semibold">Recientes</h2>
           {items.length > 3 && (
-            <Link to="/app/biblioteca" className="text-sm text-signal-ink hover:underline">
+            <Link to="/biblioteca" className="text-sm text-signal-ink hover:underline">
               Ver toda la biblioteca
             </Link>
           )}

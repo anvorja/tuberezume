@@ -255,7 +255,7 @@ export default function Library() {
               : "Prueba con otro título, quita el filtro o cambia de etiqueta."}
           </p>
           {items.length === 0 ? (
-            <Button asChild><Link to="/app">Resumir un video</Link></Button>
+            <Button asChild><Link to="/">Resumir un video</Link></Button>
           ) : (
             (tag || q || filter !== "all") && (
               <Button

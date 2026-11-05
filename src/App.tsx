@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from "rea
 import { Toaster } from "sonner"
 
 import { AppShell } from "@/components/app-shell"
+import { hasSession } from "@/lib/api"
 import { LibraryProvider } from "@/lib/library"
 import { SessionProvider, useSession } from "@/lib/session"
 import AppHome from "@/pages/app-home"
@@ -24,12 +25,26 @@ function ScrollTop() {
 /** El administrador solo gestiona usuarios: se le lleva a su pantalla. */
 function MemberOnly() {
   const { role } = useSession()
-  return role === "admin" ? <Navigate to="/app/usuarios" replace /> : <Outlet />
+  return role === "admin" ? <Navigate to="/admin/usuarios" replace /> : <Outlet />
 }
 
 function AdminOnly() {
   const { role } = useSession()
-  return role === "admin" ? <Outlet /> : <Navigate to="/app" replace />
+  return role === "admin" ? <Outlet /> : <Navigate to="/" replace />
+}
+
+/** "/" es la landing sin sesión y la aplicación con sesión; el resto de rutas siempre usa el shell. */
+function Root() {
+  const { pathname } = useLocation()
+  return pathname === "/" && !hasSession() ? <Landing /> : <AppShell />
+}
+
+/** Enlaces antiguos (/app/...): se llevan a la ruta nueva sin romper favoritos. */
+function LegacyApp() {
+  const { pathname, search } = useLocation()
+  const rest = pathname.replace(/^\/app\/?/, "")
+  const to = rest.startsWith("usuarios") ? `/admin/${rest}` : `/${rest}`
+  return <Navigate to={to + search} replace />
 }
 
 export function App() {
@@ -39,20 +54,20 @@ export function App() {
       <LibraryProvider>
         <ScrollTop />
         <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/app" element={<AppShell />}>
+          <Route path="/" element={<Root />}>
             <Route element={<MemberOnly />}>
               <Route index element={<AppHome />} />
               <Route path="biblioteca" element={<Library />} />
               <Route path="resumen/:id" element={<SummaryPage />} />
             </Route>
-            <Route element={<AdminOnly />}>
+            <Route path="admin" element={<AdminOnly />}>
               <Route path="usuarios" element={<Users />} />
             </Route>
             <Route path="entrar" element={<Login />} />
             <Route path="ajustes" element={<Settings />} />
           </Route>
-          <Route path="*" element={<Landing />} />
+          <Route path="app/*" element={<LegacyApp />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Toaster position="bottom-center" theme="system" mobileOffset={{ bottom: "6.5rem" }} offset={24} />
       </LibraryProvider>

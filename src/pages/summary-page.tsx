@@ -36,7 +36,7 @@ export default function SummaryPage() {
       throw e
     }
     toast.success("Resumen eliminado")
-    navigate("/app/biblioteca")
+    navigate("/biblioteca")
   }
 
   if (state === "loading" && !item) {
@@ -56,7 +56,7 @@ export default function SummaryPage() {
       <div className="flex max-w-md flex-col items-start gap-4 px-4 py-16 md:px-12">
         <h1 className="text-3xl font-semibold">No encontramos este resumen</h1>
         <p className="text-muted-foreground">Puede que se haya eliminado. Revisa tu biblioteca.</p>
-        <Button asChild><Link to="/app/biblioteca">Ir a la biblioteca</Link></Button>
+        <Button asChild><Link to="/biblioteca">Ir a la biblioteca</Link></Button>
       </div>
     )
   }
@@ -78,7 +78,7 @@ export default function SummaryPage() {
         </p>
         <div className="flex gap-2">
           {canProcess && (
-            <Button onClick={async () => navigate(`/app/resumen/${await submit(item.url)}`)}>Reintentar</Button>
+            <Button onClick={async () => navigate(`/resumen/${await submit(item.url)}`)}>Reintentar</Button>
           )}
           <Button variant="outline" onClick={() => setAskDelete(true)}>Eliminar</Button>
         </div>
@@ -113,7 +113,7 @@ export default function SummaryPage() {
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <TagChips
               tags={item.tags ?? []}
-              onSelect={(t) => navigate(`/app/biblioteca?etiqueta=${encodeURIComponent(t)}`)}
+              onSelect={(t) => navigate(`/biblioteca?etiqueta=${encodeURIComponent(t)}`)}
             />
             <TagPicker
               value={item.tags ?? []}
