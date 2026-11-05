@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Check, ExternalLink, Copy, Trash2 } from "lucide-react"
+import { Check, ExternalLink, Copy, Link2, Trash2 } from "lucide-react"
 import { Link, useNavigate, useParams } from "react-router"
 import { toast } from "sonner"
 
@@ -23,6 +23,7 @@ export default function SummaryPage() {
   const [askDelete, setAskDelete] = React.useState(false)
   const [deleting, setDeleting] = React.useState(false)
   const [copied, setCopied] = React.useState(false)
+  const [urlCopied, setUrlCopied] = React.useState(false)
   const [tab, setTab] = React.useState<SummaryTab>("resumen")
   const item = items.find((s) => s.id === id)
 
@@ -97,6 +98,16 @@ export default function SummaryPage() {
     }
   }
 
+  const copyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(watchUrl(item.videoId))
+      setUrlCopied(true)
+      setTimeout(() => setUrlCopied(false), 1800)
+    } catch {
+      toast.error("No pudimos copiar. Selecciona el texto a mano.")
+    }
+  }
+
   return (
     <article className="grid grid-cols-[minmax(0,1fr)] gap-8 px-4 py-6 md:px-12 md:py-12 lg:grid-cols-[minmax(0,19rem)_minmax(0,1fr)] lg:gap-12">
       <header className="flex flex-col gap-5 lg:sticky lg:top-8 lg:self-start">
@@ -138,6 +149,10 @@ export default function SummaryPage() {
           <Button onClick={copy} variant="outline" size="sm">
             {copied ? <Check /> : <Copy />}
             {copied ? "Copiado" : `Copiar ${COPY_LABEL[tab]}`}
+          </Button>
+          <Button onClick={copyUrl} variant="outline" size="sm">
+            {urlCopied ? <Check /> : <Link2 />}
+            {urlCopied ? "Copiado" : "Copiar URL"}
           </Button>
           <Button asChild variant="outline" size="sm">
             <a href={watchUrl(item.videoId)} target="_blank" rel="noreferrer">
