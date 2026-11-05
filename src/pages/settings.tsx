@@ -35,7 +35,7 @@ function Segmented<T extends string>({
             aria-checked={value === o.id}
             onClick={() => onChange(o.id)}
             className={cn(
-              "h-10 shrink-0 rounded-full px-5 text-sm font-medium transition-colors",
+              "h-11 shrink-0 rounded-full px-5 text-sm font-medium transition-colors",
               value === o.id ? "bg-signal text-primary-foreground" : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -149,7 +149,7 @@ export default function Settings() {
             <button
               type="button"
               onClick={logout}
-              className="h-10 w-fit rounded-full border border-border px-5 text-sm font-medium hover:bg-surface-raised"
+              className="h-11 w-fit rounded-full border border-border px-5 text-sm font-medium hover:bg-surface-raised"
             >
               Cerrar sesión
             </button>
@@ -171,7 +171,9 @@ export default function Settings() {
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://tu-tunel.ngrok-free.app"
+            type="url"
             inputMode="url"
+            enterKeyHint="done"
             autoCapitalize="none"
             spellCheck={false}
             className="h-11 rounded-lg border border-border bg-background px-3 outline-none focus-visible:ring-2 focus-visible:ring-signal"
@@ -183,7 +185,7 @@ export default function Settings() {
         </p>
         <button
           type="submit"
-          className="h-11 w-fit rounded-full bg-signal px-6 text-sm font-medium text-primary-foreground"
+          className="h-11 w-full rounded-full bg-signal px-6 sm:w-fit text-sm font-medium text-primary-foreground"
         >
           Guardar dirección
         </button>

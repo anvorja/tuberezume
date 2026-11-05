@@ -120,7 +120,8 @@
     border-radius: 0.5rem;
   }
   input,
-  textarea {
+  textarea,
+  select {
     caret-color: var(--signal-ink);
     font-size: 16px; /* evita el zoom de iOS al enfocar */
   }
@@ -249,8 +250,25 @@ body::after {
   }
 }
 
+/* Respiro mínimo bajo la barra inferior, o el inset del dispositivo si es mayor. */
 .safe-b {
-  padding-bottom: max(env(safe-area-inset-bottom), 0px);
+  padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+}
+.safe-t {
+  padding-top: env(safe-area-inset-top);
+}
+/* Carriles de desplazamiento horizontal (chips, pestañas): sin barra, con imán al soltar. */
+.rail {
+  overflow-x: auto;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+}
+.rail::-webkit-scrollbar {
+  display: none;
+}
+.rail > * {
+  scroll-snap-align: start;
 }
 
 @media (prefers-reduced-motion: reduce) {

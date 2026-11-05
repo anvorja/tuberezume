@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Folder, LayoutGrid, List, Search } from "lucide-react"
+import { Folder, LayoutGrid, List, Search, X } from "lucide-react"
 import { Link, useSearchParams } from "react-router"
 import { toast } from "sonner"
 
@@ -41,12 +41,11 @@ function useView() {
 }
 
 const pill =
-  "inline-flex h-9 shrink-0 items-center gap-2 rounded-full border px-3.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-signal focus-visible:outline-none"
+  "inline-flex h-10 shrink-0 items-center gap-2 rounded-full border px-3.5 md:h-9 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-signal focus-visible:outline-none"
 
 export default function Library() {
   const { items, state, error, reload, setTags } = useLibrary()
   const [params, setParams] = useSearchParams()
-  const [q, setQ] = React.useState("")
   const [filter, setFilter] = React.useState<(typeof FILTERS)[number]["id"]>("all")
   const [view, setView] = useView()
 
@@ -62,6 +61,14 @@ export default function Library() {
       : wanted && tags.some((t) => t.name.toLocaleLowerCase() === wanted.toLocaleLowerCase())
         ? wanted
         : null
+  // La búsqueda también vive en la URL: al volver desde un resumen con Atrás, el filtro sigue ahí.
+  const q = params.get("q") ?? ""
+  const setQ = (v: string) => {
+    const next = new URLSearchParams(params)
+    if (v) next.set("q", v)
+    else next.delete("q")
+    setParams(next, { replace: true })
+  }
   const pickTag = (t: string | null) => {
     const next = new URLSearchParams(params)
     if (t) next.set("etiqueta", t)
@@ -90,9 +97,9 @@ export default function Library() {
   const title = tag === UNTAGGED ? "Sin etiqueta" : (tag ?? "Biblioteca")
 
   return (
-    <div className="flex flex-col gap-6 px-4 py-8 md:px-12 md:py-12">
+    <div className="flex flex-col gap-5 px-4 py-6 md:gap-6 md:px-12 md:py-12">
       <div className="flex items-baseline justify-between gap-4">
-        <h1 className="min-w-0 truncate text-4xl font-semibold md:text-6xl">{title}</h1>
+        <h1 className="min-w-0 truncate text-3xl font-semibold sm:text-4xl md:text-6xl">{title}</h1>
         {state === "ready" && (
           <p className="shrink-0 text-sm text-muted-foreground tnum">
             {shown.length} {shown.length === 1 ? "video" : "videos"}
@@ -107,13 +114,26 @@ export default function Library() {
           <input
             id="lib-q"
             value={q}
+            type="search"
+            enterKeyHint="search"
+            autoComplete="off"
             onChange={(e) => setQ(e.target.value)}
             placeholder="Buscar por título, canal o etiqueta"
-            className="h-11 min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground/80"
+            className="h-11 min-w-0 flex-1 appearance-none bg-transparent outline-none placeholder:text-muted-foreground/80 [&::-webkit-search-cancel-button]:hidden"
           />
+          {q && (
+            <button
+              type="button"
+              onClick={() => setQ("")}
+              aria-label="Borrar búsqueda"
+              className="-mr-2 grid size-10 shrink-0 place-items-center rounded-full text-muted-foreground hover:text-foreground"
+            >
+              <X className="size-4" />
+            </button>
+          )}
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div role="radiogroup" aria-label="Filtrar por estado" className="flex gap-1 rounded-full border border-border bg-surface p-1">
+        <div className="flex items-center gap-2 sm:flex-wrap sm:gap-3">
+          <div role="radiogroup" aria-label="Filtrar por estado" className="flex min-w-0 flex-1 gap-1 rounded-full border border-border bg-surface p-1 sm:flex-none">
             {FILTERS.map((f) => (
               <button
                 key={f.id}
@@ -121,7 +141,7 @@ export default function Library() {
                 aria-checked={filter === f.id}
                 onClick={() => setFilter(f.id)}
                 className={cn(
-                  "h-9 rounded-full px-4 text-sm font-medium whitespace-nowrap transition-colors",
+                  "h-10 flex-1 rounded-full px-3 text-sm font-medium whitespace-nowrap transition-colors sm:flex-none sm:px-4 md:h-9",
                   filter === f.id ? "bg-signal text-primary-foreground" : "text-muted-foreground"
                 )}
               >
@@ -129,7 +149,7 @@ export default function Library() {
               </button>
             ))}
           </div>
-          <div role="radiogroup" aria-label="Tipo de vista" className="ml-auto flex gap-1 rounded-full border border-border bg-surface p-1 md:ml-0">
+          <div role="radiogroup" aria-label="Tipo de vista" className="flex shrink-0 gap-1 rounded-full border border-border bg-surface p-1 sm:ml-auto md:ml-0">
             {(
               [
                 { id: "grid", label: "Miniaturas", icon: LayoutGrid },
@@ -144,7 +164,7 @@ export default function Library() {
                 title={label}
                 onClick={() => setView(id)}
                 className={cn(
-                  "grid size-9 place-items-center rounded-full transition-colors",
+                  "grid size-10 place-items-center rounded-full transition-colors md:size-9",
                   view === id ? "bg-signal text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -159,7 +179,7 @@ export default function Library() {
         <div
           role="radiogroup"
           aria-label="Filtrar por etiqueta"
-          className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0"
+          className="rail -mx-4 flex gap-2 px-4 md:mx-0 md:flex-wrap md:overflow-visible md:px-0"
         >
           <button
             role="radio"
@@ -241,9 +261,8 @@ export default function Library() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  setQ("")
                   setFilter("all")
-                  pickTag(null)
+                  setParams({}, { replace: true })
                 }}
               >
                 Quitar filtros

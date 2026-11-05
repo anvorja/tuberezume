@@ -31,7 +31,7 @@ export function Processing({ item }: { item: Summary }) {
   return (
     <section
       aria-live="polite"
-      className="relative isolate flex min-h-[calc(100dvh-8rem)] flex-col justify-end overflow-hidden rounded-3xl border border-border"
+      className="relative isolate flex min-h-[calc(100dvh-12rem)] md:min-h-[calc(100dvh-8rem)] flex-col justify-end overflow-hidden rounded-3xl border border-border"
     >
       <FiberField progress={progress} anchor={0.42} interactive={false} className="absolute inset-0 -z-10" />
       <div className="flex flex-col gap-8 bg-gradient-to-t from-background via-background/80 to-transparent p-6 pt-24 md:p-10 md:pt-32">

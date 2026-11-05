@@ -98,7 +98,7 @@ export default function SummaryPage() {
   }
 
   return (
-    <article className="grid gap-8 px-4 py-6 md:px-12 md:py-12 lg:grid-cols-[minmax(0,19rem)_minmax(0,1fr)] lg:gap-12">
+    <article className="grid grid-cols-[minmax(0,1fr)] gap-8 px-4 py-6 md:px-12 md:py-12 lg:grid-cols-[minmax(0,19rem)_minmax(0,1fr)] lg:gap-12">
       <header className="flex flex-col gap-5 lg:sticky lg:top-8 lg:self-start">
         <div className="aspect-video max-w-sm overflow-hidden rounded-xl border border-border lg:max-w-none">
           <Thumb videoId={item.videoId} />

@@ -44,7 +44,10 @@ function Header() {
       <div className="flex items-center gap-1">
         <ThemeToggle />
         <Button asChild variant="outline" size="sm">
-          <Link to="/app/biblioteca">Mi biblioteca</Link>
+          <Link to="/app/biblioteca">
+            <span className="max-[360px]:hidden">Mi </span>
+            <span className="max-[360px]:first-letter:uppercase">biblioteca</span>
+          </Link>
         </Button>
       </div>
     </header>
@@ -183,7 +186,7 @@ function Example() {
             Así se ve un resumen terminado. Está escrito a mano como ejemplo del formato.
           </p>
         </div>
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:gap-16">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:gap-16">
           <div className="flex flex-col gap-4 lg:sticky lg:top-10 lg:self-start">
             <div className="aspect-video overflow-hidden rounded-xl border border-border"><Thumb videoId={SAMPLE.videoId} /></div>
             <h3 className="text-2xl leading-tight font-semibold">{SAMPLE.title}</h3>

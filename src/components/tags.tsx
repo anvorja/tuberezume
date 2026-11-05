@@ -40,7 +40,7 @@ export function TagChips({
             <button
               type="button"
               onClick={() => onSelect(t)}
-              className={cn(chip, "transition-colors hover:border-signal-ink/60 hover:text-foreground")}
+              className={cn(chip, "relative transition-colors before:absolute before:-inset-x-1 before:-inset-y-2 before:content-[''] hover:border-signal-ink/60 hover:text-foreground")}
             >
               <TagDot name={t} />
               <span className="truncate">{t}</span>
@@ -160,9 +160,10 @@ export function TagPicker({
             }}
             placeholder="Buscar o crear etiqueta…"
             autoComplete="off"
-            className="h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-signal"
+            enterKeyHint="done"
+            className="h-11 rounded-lg border border-border bg-background px-3 text-base outline-none md:h-10 md:text-sm focus-visible:ring-2 focus-visible:ring-signal"
           />
-          <ul className="flex max-h-48 flex-col gap-0.5 overflow-y-auto" aria-label="Etiquetas disponibles">
+          <ul className="flex max-h-[min(12rem,35dvh)] flex-col gap-0.5 overflow-y-auto overscroll-contain" aria-label="Etiquetas disponibles">
             {options.map((t) => (
               <li key={t}>
                 <button
@@ -171,7 +172,7 @@ export function TagPicker({
                   aria-checked={has(t)}
                   disabled={busy}
                   onClick={() => void toggle(t)}
-                  className="flex h-9 w-full items-center gap-2 rounded-lg px-2 text-left text-sm transition-colors hover:bg-background/60"
+                  className="flex h-11 w-full items-center gap-2 rounded-lg px-2 text-left text-sm transition-colors hover:bg-background/60 md:h-9"
                 >
                   <TagDot name={t} />
                   <span className="min-w-0 flex-1 truncate">{t}</span>
@@ -185,7 +186,7 @@ export function TagPicker({
                   type="button"
                   disabled={busy}
                   onClick={create}
-                  className="flex h-9 w-full items-center gap-2 rounded-lg px-2 text-left text-sm text-signal-ink transition-colors hover:bg-background/60"
+                  className="flex h-11 w-full items-center gap-2 rounded-lg px-2 text-left text-sm text-signal-ink md:h-9 transition-colors hover:bg-background/60"
                 >
                   <Plus className="size-4" />
                   <span className="truncate">Crear «{typed}»</span>
@@ -219,7 +220,7 @@ export const TagButton = React.forwardRef<
       aria-label={label ?? "Editar etiquetas"}
       title={label ?? "Editar etiquetas"}
       className={cn(
-        "inline-flex size-8 items-center justify-center rounded-full border border-border bg-background/60 text-muted-foreground backdrop-blur transition-colors hover:border-signal-ink/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-signal focus-visible:outline-none",
+        "relative inline-flex size-9 items-center justify-center rounded-full border before:absolute before:-inset-1 before:content-[''] md:size-8 border-border bg-background/60 text-muted-foreground backdrop-blur transition-colors hover:border-signal-ink/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-signal focus-visible:outline-none",
         count > 0 && "text-foreground",
         className
       )}

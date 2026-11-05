@@ -44,7 +44,7 @@ export function ConfirmDelete({
       }}>
       <AlertDialog.Portal>
         <AlertDialog.Overlay className="dialog-overlay fixed inset-0 z-50 bg-background/70 backdrop-blur-sm" />
-        <AlertDialog.Content className="dialog-content fixed top-1/2 left-1/2 z-50 flex w-[min(92vw,28rem)] -translate-x-1/2 -translate-y-1/2 flex-col gap-5 rounded-2xl border border-border bg-surface-raised p-6 shadow-2xl outline-none">
+        <AlertDialog.Content className="dialog-content fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[min(92vw,28rem)] -translate-x-1/2 -translate-y-1/2 flex-col gap-5 overflow-y-auto rounded-2xl border border-border bg-surface-raised p-6 shadow-2xl outline-none">
           <div className="flex flex-col gap-3">
             <AlertDialog.Title className="font-display text-2xl leading-tight font-semibold tracking-tight">
               ¿Eliminar este resumen?

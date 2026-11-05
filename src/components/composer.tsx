@@ -61,12 +61,13 @@ export function Composer({ onSubmit, busy, id, className, autoFocus, onValueChan
       </label>
       <div
         data-busy={busy ? "true" : "false"}
-        className="thread-ring flex items-center gap-1 bg-surface p-1.5 pl-5 backdrop-blur-xl"
+        className="thread-ring flex items-center gap-1 bg-surface p-1.5 pl-4 backdrop-blur-xl sm:pl-5"
       >
         <input
           id={id ?? inputId}
           type="url"
           inputMode="url"
+          enterKeyHint="go"
           autoComplete="off"
           autoCapitalize="off"
           spellCheck={false}
@@ -81,7 +82,7 @@ export function Composer({ onSubmit, busy, id, className, autoFocus, onValueChan
           aria-invalid={!!error}
           aria-describedby={error ? errId : undefined}
           placeholder="youtube.com/watch?v=…"
-          className="h-11 min-w-0 flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground/80 disabled:opacity-60"
+          className="h-11 min-w-0 flex-1 bg-transparent text-foreground outline-none text-ellipsis placeholder:text-muted-foreground/80 disabled:opacity-60"
         />
         {!value && !busy && (
           <Button
@@ -95,9 +96,9 @@ export function Composer({ onSubmit, busy, id, className, autoFocus, onValueChan
             <ClipboardPaste />
           </Button>
         )}
-        <Button type="submit" size="lg" disabled={busy} className="shrink-0 pr-5 pl-6">
-          {busy ? "Procesando" : "Resumir"}
-          <ArrowRight className="transition-transform duration-300 ease-out-expo group-hover/button:translate-x-0.5" />
+        <Button type="submit" size="lg" disabled={busy} className="shrink-0 pr-4 pl-5 sm:pr-5 sm:pl-6">
+          {busy ? "Enviando" : "Resumir"}
+          <ArrowRight className="transition-transform max-[380px]:hidden duration-300 ease-out-expo group-hover/button:translate-x-0.5" />
         </Button>
       </div>
       <p

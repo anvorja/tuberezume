@@ -100,20 +100,20 @@ export function SummaryBody({
     >
       <Tabs.List
         aria-label="Secciones del resumen"
-        className="flex w-fit max-w-full gap-1 overflow-x-auto rounded-full border border-border bg-surface p-1"
+        className="rail sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-10 flex w-fit max-w-full gap-1 rounded-full border border-border bg-background/90 p-1 backdrop-blur-xl md:static md:bg-surface"
       >
         {TABS.filter((t) => t.id !== "notas" || onSaveNotes).map((t) => (
           <Tabs.Trigger
             key={t.id}
             value={t.id}
-            className="h-9 shrink-0 rounded-full px-4 text-sm font-medium text-muted-foreground transition-colors data-[state=active]:bg-signal data-[state=active]:text-primary-foreground"
+            className="h-10 shrink-0 rounded-full px-4 text-sm font-medium text-muted-foreground transition-colors data-[state=active]:bg-signal data-[state=active]:text-primary-foreground md:h-9"
           >
             {t.label}
           </Tabs.Trigger>
         ))}
       </Tabs.List>
 
-      <div ref={panel}>
+      <div ref={panel} className="scroll-mt-32">
         <Tabs.Content value="resumen" className="flex flex-col gap-8 outline-none">
           <p data-in className="max-w-[60ch] font-display text-[1.35rem] leading-snug tracking-tight md:text-[1.6rem]">
             {item.tldr}
@@ -181,6 +181,8 @@ export function SummaryBody({
               id={`q-${item.id}`}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              type="search"
+              enterKeyHint="search"
               placeholder="Buscar en la transcripción"
               className="h-11 min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground/80"
             />
@@ -197,7 +199,7 @@ export function SummaryBody({
                     href={watchUrl(item.videoId, l.start)}
                     target="_blank"
                     rel="noreferrer"
-                    className="tnum font-mono text-xs leading-6 text-signal-ink hover:underline"
+                    className="tnum -my-3 py-3 font-mono text-xs leading-6 text-signal-ink hover:underline"
                   >
                     {formatTime(l.start)}
                   </a>

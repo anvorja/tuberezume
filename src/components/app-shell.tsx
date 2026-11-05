@@ -53,20 +53,20 @@ export function AppShell() {
       </aside>
 
       <div className="flex min-w-0 flex-col">
-        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur-xl md:hidden">
+        <header className="safe-t sticky top-0 z-20 flex min-h-14 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur-xl md:hidden">
           <Link to="/" aria-label="TubeRezume, inicio">
             <Wordmark />
           </Link>
           <ThemeToggle />
         </header>
-        <main className="min-w-0 flex-1 pb-28 md:pb-0">
+        <main className="min-w-0 flex-1 pb-[calc(6.5rem+env(safe-area-inset-bottom))] md:pb-0">
           <Outlet />
         </main>
       </div>
 
       <nav
         aria-label="Principal"
-        className="safe-b fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/85 px-3 pt-2 pb-2 backdrop-blur-xl md:hidden"
+        className="safe-b fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/85 px-3 pt-2 backdrop-blur-xl md:hidden"
       >
         <ul className="mx-auto grid max-w-md gap-1" style={{ gridTemplateColumns: `repeat(${NAV.length}, minmax(0, 1fr))` }}>
           {NAV.map(({ to, label, icon: Icon, end }) => (

@@ -170,7 +170,7 @@ export default function Users() {
                         setArmed(null)
                         run(() => adminApi.remove(u.id), "Usuario y sus resúmenes eliminados")
                       }}
-                      className="bg-destructive text-background hover:bg-destructive hover:brightness-110"
+                      className="h-auto min-h-9 bg-destructive py-2 text-left whitespace-normal text-background hover:bg-destructive hover:brightness-110"
                     >
                       <Trash2 /> Confirmar: borra también sus resúmenes
                     </Button>

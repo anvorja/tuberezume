@@ -54,7 +54,7 @@ export function App() {
           </Route>
           <Route path="*" element={<Landing />} />
         </Routes>
-        <Toaster position="bottom-center" theme="system" />
+        <Toaster position="bottom-center" theme="system" mobileOffset={{ bottom: "6.5rem" }} offset={24} />
       </LibraryProvider>
       </SessionProvider>
     </BrowserRouter>

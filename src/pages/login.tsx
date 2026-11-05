@@ -60,7 +60,9 @@ export default function Login() {
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://tu-servidor"
+            type="url"
             inputMode="url"
+            enterKeyHint="next"
             autoCapitalize="none"
             spellCheck={false}
             className={input}
@@ -72,6 +74,7 @@ export default function Login() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             autoComplete="username"
+            enterKeyHint="next"
             autoCapitalize="none"
             spellCheck={false}
             className={input}
@@ -84,13 +87,14 @@ export default function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
+            enterKeyHint="go"
             className={input}
           />
         </label>
         <p role="alert" className="min-h-5 text-sm text-destructive">
           {error}
         </p>
-        <Button type="submit" disabled={busy || !url || !username || !password} className="w-fit">
+        <Button type="submit" disabled={busy || !url || !username || !password} className="w-full sm:w-fit">
           {busy ? "Entrando…" : "Entrar"}
         </Button>
       </form>
