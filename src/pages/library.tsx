@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Folder, LayoutGrid, List, Search, X } from "lucide-react"
+import { Folder, LayoutGrid, List, RefreshCw, Search, X } from "lucide-react"
 import { Link, useSearchParams } from "react-router"
 import { toast } from "sonner"
 
@@ -48,6 +48,14 @@ export default function Library() {
   const [params, setParams] = useSearchParams()
   const [filter, setFilter] = React.useState<(typeof FILTERS)[number]["id"]>("all")
   const [view, setView] = useView()
+  const [refreshing, setRefreshing] = React.useState(false)
+
+  const refresh = async () => {
+    setRefreshing(true)
+    // Un mínimo de giro, para que se note que se actualizó aunque el servidor responda al instante.
+    await Promise.all([reload(), new Promise((r) => setTimeout(r, 500))])
+    setRefreshing(false)
+  }
 
   const tags = React.useMemo(() => collectTags(items), [items])
   const known = React.useMemo(() => tags.map((t) => t.name), [tags])
@@ -172,6 +180,16 @@ export default function Library() {
               </button>
             ))}
           </div>
+          <button
+            type="button"
+            onClick={refresh}
+            disabled={refreshing}
+            aria-label="Actualizar biblioteca"
+            title="Actualizar"
+            className="grid size-12 shrink-0 place-items-center rounded-full border border-border bg-surface text-muted-foreground transition-colors hover:text-foreground disabled:opacity-70 md:size-11"
+          >
+            <RefreshCw className={cn("size-4", refreshing && "animate-spin motion-reduce:animate-none")} />
+          </button>
         </div>
       </div>
 
