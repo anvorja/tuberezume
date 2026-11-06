@@ -106,17 +106,29 @@ export default function Library() {
 
   return (
     <div className="flex flex-col gap-5 px-4 py-6 md:gap-6 md:px-12 md:py-12">
-      <div className="flex items-baseline justify-between gap-4">
+      <div className="flex items-center justify-between gap-4">
         <h1 className="min-w-0 truncate text-3xl font-semibold sm:text-4xl md:text-6xl">{title}</h1>
-        {state === "ready" && (
-          <p className="shrink-0 text-sm text-muted-foreground tnum">
-            {shown.length} {shown.length === 1 ? "video" : "videos"}
-          </p>
-        )}
+        <div className="flex shrink-0 items-center gap-1">
+          {state === "ready" && (
+            <p className="text-sm text-muted-foreground tnum">
+              {shown.length} {shown.length === 1 ? "video" : "videos"}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={refresh}
+            disabled={refreshing || state === "loading"}
+            aria-label="Actualizar biblioteca"
+            title="Actualizar"
+            className="grid size-10 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-surface-raised hover:text-foreground focus-visible:ring-2 focus-visible:ring-signal focus-visible:outline-none disabled:opacity-60"
+          >
+            <RefreshCw className={cn("size-4", refreshing && "animate-spin motion-reduce:animate-none")} />
+          </button>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-3 md:flex-row md:items-center">
-        <div className="thread-ring flex flex-1 items-center gap-2 bg-surface px-4 md:max-w-md">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+        <div className="thread-ring flex flex-1 items-center gap-2 bg-surface px-4 lg:max-w-md">
           <Search className="size-4 shrink-0 text-muted-foreground" />
           <label htmlFor="lib-q" className="sr-only">Buscar resúmenes</label>
           <input
@@ -140,8 +152,8 @@ export default function Library() {
             </button>
           )}
         </div>
-        <div className="flex items-center gap-2 sm:flex-wrap sm:gap-3">
-          <div role="radiogroup" aria-label="Filtrar por estado" className="flex min-w-0 flex-1 gap-1 rounded-full border border-border bg-surface p-1 sm:flex-none">
+        <div className="flex items-center gap-2 max-[359px]:flex-wrap sm:flex-wrap sm:gap-3">
+          <div role="radiogroup" aria-label="Filtrar por estado" className="flex min-w-0 flex-1 gap-1 rounded-full border border-border bg-surface p-1 max-[359px]:basis-full sm:flex-none">
             {FILTERS.map((f) => (
               <button
                 key={f.id}
@@ -157,7 +169,7 @@ export default function Library() {
               </button>
             ))}
           </div>
-          <div role="radiogroup" aria-label="Tipo de vista" className="flex shrink-0 gap-1 rounded-full border border-border bg-surface p-1 sm:ml-auto md:ml-0">
+          <div role="radiogroup" aria-label="Tipo de vista" className="flex shrink-0 gap-1 rounded-full border border-border bg-surface p-1 max-[359px]:ml-auto sm:ml-auto lg:ml-0">
             {(
               [
                 { id: "grid", label: "Miniaturas", icon: LayoutGrid },
@@ -180,16 +192,6 @@ export default function Library() {
               </button>
             ))}
           </div>
-          <button
-            type="button"
-            onClick={refresh}
-            disabled={refreshing}
-            aria-label="Actualizar biblioteca"
-            title="Actualizar"
-            className="grid size-12 shrink-0 place-items-center rounded-full border border-border bg-surface text-muted-foreground transition-colors hover:text-foreground disabled:opacity-70 md:size-11"
-          >
-            <RefreshCw className={cn("size-4", refreshing && "animate-spin motion-reduce:animate-none")} />
-          </button>
         </div>
       </div>
 
