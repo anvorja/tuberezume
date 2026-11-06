@@ -25,9 +25,9 @@ function Segmented<T extends string>({
   options: { id: T; label: string }[]
 }) {
   return (
-    <div className="flex flex-col gap-3">
-      <p id={`seg-${label}`} className="font-medium">{label}</p>
-      <div role="radiogroup" aria-labelledby={`seg-${label}`} className="flex w-fit max-w-full gap-1 overflow-x-auto rounded-full border border-border bg-surface p-1">
+    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4 md:px-5 md:py-4">
+      <p id={`seg-${label}`} className="font-medium md:whitespace-nowrap md:text-sm">{label}</p>
+      <div role="radiogroup" aria-labelledby={`seg-${label}`} className="flex w-fit max-w-full shrink-0 gap-1 overflow-x-auto rounded-full border border-border bg-surface p-1 md:bg-background">
         {options.map((o) => (
           <button
             key={o.id}
@@ -35,7 +35,7 @@ function Segmented<T extends string>({
             aria-checked={value === o.id}
             onClick={() => onChange(o.id)}
             className={cn(
-              "h-11 shrink-0 rounded-full px-5 text-sm font-medium transition-colors",
+              "h-11 shrink-0 rounded-full px-5 text-sm font-medium transition-colors md:h-8 md:px-4",
               value === o.id ? "bg-signal text-primary-foreground" : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -89,8 +89,10 @@ export default function Settings() {
   }
 
   return (
-    <div className="flex max-w-2xl flex-col gap-10 px-4 py-8 md:px-12 md:py-12">
-      <h1 className="text-4xl font-semibold md:text-6xl">Ajustes</h1>
+    <div className="flex max-w-5xl flex-col gap-8 px-4 py-8 md:gap-6 md:px-12 md:py-10">
+      <h1 className="text-4xl font-semibold md:text-4xl">Ajustes</h1>
+      <div className="flex flex-col gap-8 md:grid md:grid-cols-2 md:items-start md:gap-6">
+      <div className="flex flex-col gap-10 md:gap-0 md:divide-y md:divide-border md:overflow-hidden md:rounded-xl md:border md:border-border md:bg-surface">
       <Segmented
         label="Tema"
         value={theme}
@@ -123,6 +125,8 @@ export default function Settings() {
           { id: "on", label: "Sí" },
         ]}
       />
+      </div>
+      <div className="flex flex-col gap-8 md:gap-6">
       <section className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-5">
         <p className="font-medium">Cuenta</p>
         {status === "anon" ? (
@@ -190,6 +194,8 @@ export default function Settings() {
           Guardar dirección
         </button>
       </form>
+      </div>
+      </div>
     </div>
   )
 }

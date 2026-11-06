@@ -49,7 +49,6 @@ export function AppShell() {
             ))}
           </nav>
         </div>
-        <ThemeToggle className="self-start" />
       </aside>
 
       <div className="flex min-w-0 flex-col">
