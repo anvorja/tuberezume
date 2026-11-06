@@ -17,11 +17,12 @@ import { formatDuration, timeAgo, watchUrl } from "@/lib/youtube"
 
 export default function SummaryPage() {
   const { id } = useParams()
-  const { items, state, remove, submit, saveNotes, setTags } = useLibrary()
+  const { items, state, remove, resume, submit, saveNotes, setTags } = useLibrary()
   const { canProcess } = useSession()
   const navigate = useNavigate()
   const [askDelete, setAskDelete] = React.useState(false)
   const [deleting, setDeleting] = React.useState(false)
+  const [resuming, setResuming] = React.useState(false)
   const [copied, setCopied] = React.useState(false)
   const [urlCopied, setUrlCopied] = React.useState(false)
   const [tab, setTab] = React.useState<SummaryTab>("resumen")
@@ -66,6 +67,35 @@ export default function SummaryPage() {
     return (
       <div className="px-4 py-4 md:p-8">
         <Processing item={item} />
+      </div>
+    )
+  }
+
+  if (item.status === "interrupted") {
+    const doResume = async () => {
+      setResuming(true)
+      try {
+        await resume(item.id)
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "No pudimos reanudar el resumen.")
+      } finally {
+        setResuming(false)
+      }
+    }
+    return (
+      <div className="flex max-w-lg flex-col items-start gap-4 px-4 py-16 md:px-12">
+        <h1 className="text-3xl font-semibold">Este resumen quedó a medias</h1>
+        <p className="text-muted-foreground">
+          {item.error ?? "El servidor se reinició antes de terminar."}
+          {!canProcess && " Este servidor es solo de consulta: reanúdalo desde el equipo que procesa los videos."}
+        </p>
+        <div className="flex gap-2">
+          {canProcess && (
+            <Button onClick={doResume} disabled={resuming}>{resuming ? "Reanudando…" : "Reanudar"}</Button>
+          )}
+          <Button variant="outline" onClick={() => setAskDelete(true)}>Descartar</Button>
+        </div>
+        <ConfirmDelete open={askDelete} onOpenChange={setAskDelete} title={item.title || item.url} onConfirm={doDelete} />
       </div>
     )
   }

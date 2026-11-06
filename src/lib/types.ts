@@ -4,6 +4,8 @@ export type SummaryStatus =
   | "summarizing"
   | "ready"
   | "failed"
+  /** el servidor se reinició a mitad de proceso: el usuario decide si reanudar o descartar */
+  | "interrupted"
 
 export interface Chapter {
   start: number

@@ -10,6 +10,7 @@ import { parseYouTubeId } from "./youtube"
  *   GET    /summaries                 -> Summary[]
  *   GET    /summaries/:id             -> Summary
  *   DELETE /summaries/:id
+ *   POST   /summaries/:id/resume      -> Summary (de nuevo en cola, solo si está "interrupted")
  *   PATCH  /summaries/:id/notes { notes }
  *   PATCH  /summaries/:id/tags  { tags }
  * Todas exigen sesión (POST /auth/login). El administrador solo usa /admin/users.
@@ -21,6 +22,7 @@ export interface Api {
   get(id: string): Promise<Summary>
   create(url: string): Promise<Summary>
   remove(id: string): Promise<void>
+  resume(id: string): Promise<Summary>
   saveNotes(id: string, notes: string): Promise<Summary>
   saveTags(id: string, tags: string[]): Promise<Summary>
 }
@@ -133,6 +135,7 @@ function makeHttpApi(conn: Connection): Api {
         body: JSON.stringify({ url, webSearch: getWebSearch() }),
       }),
     remove: (id) => http(conn, `/summaries/${id}`, { method: "DELETE" }),
+    resume: (id) => http(conn, `/summaries/${id}/resume`, { method: "POST" }),
     saveNotes: (id, notes) =>
       http(conn, `/summaries/${id}/notes`, { method: "PATCH", body: JSON.stringify({ notes }) }),
     saveTags: (id, tags) =>
@@ -349,6 +352,14 @@ const mockApi: Api = {
     await sleep(120)
     save(load().filter((s) => s.id !== id))
   },
+  async resume(id) {
+    const items = load()
+    const found = items.find((s) => s.id === id)
+    if (!found) throw new Error("No encontramos este resumen.")
+    Object.assign(found, { status: "queued", progress: 0, error: undefined, startedAt: Date.now() })
+    save(items)
+    return found
+  },
   async saveNotes(id, notes) {
     const items = load()
     const found = items.find((s) => s.id === id)
@@ -378,6 +389,7 @@ export const api: Api = {
   get: (id) => current().get(id),
   create: (url) => current().create(url),
   remove: (id) => current().remove(id),
+  resume: (id) => current().resume(id),
   saveNotes: (id, notes) => current().saveNotes(id, notes),
   saveTags: (id, tags) => current().saveTags(id, tags),
 }

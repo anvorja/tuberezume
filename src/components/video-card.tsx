@@ -13,6 +13,7 @@ const STATUS_LABEL: Record<Summary["status"], string> = {
   summarizing: "Resumiendo",
   ready: "Listo",
   failed: "Falló",
+  interrupted: "Interrumpido",
 }
 
 export function Thumb({ videoId, className }: { videoId: string; className?: string }) {
@@ -43,7 +44,8 @@ interface CardProps {
   onSelectTag?: (tag: string) => void
 }
 
-const isBusy = (s: Summary) => s.status !== "ready" && s.status !== "failed"
+const isBusy = (s: Summary) => s.status !== "ready" && s.status !== "failed" && s.status !== "interrupted"
+const isStuck = (s: Summary) => s.status === "failed" || s.status === "interrupted"
 
 function Tagger({ item, knownTags, onTagsChange, className }: CardProps & { className?: string }) {
   if (!onTagsChange || isBusy(item)) return null
@@ -104,7 +106,7 @@ export function VideoCard({ item, className, knownTags, onTagsChange, onSelectTa
           <TagChips tags={item.tags!} max={2} onSelect={onSelectTag} className="relative z-10 pt-1" />
         )}
         <p className="mt-auto flex items-center gap-2 pt-1.5 text-xs text-muted-foreground">
-          <span className={cn(item.status === "failed" && "text-destructive", active && "text-signal-ink")}>
+          <span className={cn(isStuck(item) && "text-destructive", active && "text-signal-ink")}>
             {STATUS_LABEL[item.status]}
           </span>
           <span aria-hidden>/</span>
@@ -150,7 +152,7 @@ export function VideoRow({ item, className, knownTags, onTagsChange, onSelectTag
           <span aria-hidden>/</span>
           <span className="shrink-0">{timeAgo(item.createdAt)}</span>
           <span aria-hidden>/</span>
-          <span className={cn("shrink-0", item.status === "failed" && "text-destructive", active && "text-signal-ink")}>
+          <span className={cn("shrink-0", isStuck(item) && "text-destructive", active && "text-signal-ink")}>
             {STATUS_LABEL[item.status]}
           </span>
         </p>

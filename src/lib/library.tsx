@@ -1,4 +1,5 @@
 import * as React from "react"
+import { toast } from "sonner"
 
 import { api } from "./api"
 import { useSession } from "./session"
@@ -14,6 +15,8 @@ interface LibraryContextValue {
   /** Crea el resumen y devuelve su id. Lanza con un mensaje legible. */
   submit: (url: string) => Promise<string>
   remove: (id: string) => Promise<void>
+  /** Vuelve a poner en cola un resumen interrumpido por un reinicio del servidor. */
+  resume: (id: string) => Promise<void>
   saveNotes: (id: string, notes: string) => Promise<void>
   /** Cambia las etiquetas al instante y deshace el cambio si el servidor lo rechaza. */
   setTags: (id: string, tags: string[]) => Promise<void>
@@ -56,6 +59,15 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
         if (!alive) return
         setItems(list)
         setState("ready")
+        const stuck = list.filter((s) => s.status === "interrupted").length
+        if (stuck > 0) {
+          toast.warning(
+            stuck === 1
+              ? "Un resumen quedó interrumpido porque el servidor se reinició."
+              : `${stuck} resúmenes quedaron interrumpidos porque el servidor se reinició.`,
+            { id: "interrupted", description: "Ábrelos en la biblioteca para reanudarlos o descartarlos." }
+          )
+        }
       })
       .catch((e) => {
         if (!alive) return
@@ -95,6 +107,11 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => prev.filter((p) => p.id !== id))
   }, [])
 
+  const resume = React.useCallback(async (id: string) => {
+    const updated = await api.resume(id)
+    setItems((prev) => prev.map((p) => (p.id === id ? updated : p)))
+  }, [])
+
   const saveNotes = React.useCallback(async (id: string, notes: string) => {
     const updated = await api.saveNotes(id, notes)
     setItems((prev) => prev.map((p) => (p.id === id ? { ...p, notes: updated.notes } : p)))
@@ -120,8 +137,8 @@ export function LibraryProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const value = React.useMemo(
-    () => ({ items, state, error, reload, submit, remove, saveNotes, setTags }),
-    [items, state, error, reload, submit, remove, saveNotes, setTags]
+    () => ({ items, state, error, reload, submit, remove, resume, saveNotes, setTags }),
+    [items, state, error, reload, submit, remove, resume, saveNotes, setTags]
   )
   return <LibraryContext.Provider value={value}>{children}</LibraryContext.Provider>
 }
